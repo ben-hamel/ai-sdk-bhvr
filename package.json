@@ -1,5 +1,5 @@
 {
-  "name": "AI-SDK-bhvr",
+  "name": "ai-sdk-bhvr",
   "version": "0.4.0",
   "description": "A monorepo template built with Bun, Hono, Vite, and React",
   "author": "Steve Simkins",
