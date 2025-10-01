@@ -1,5 +1,5 @@
 {
-  "name": "AI-SDK-bhvr",
+  "name": "ai-sdk-bhvr",
   "version": "0.4.0",
   "description": "A monorepo template built with Bun, Hono, Vite, and React",
   "author": "Steve Simkins",
@@ -12,17 +12,19 @@
     "./shared"
   ],
   "scripts": {
-    "dev:client": "cd client && bun run dev",
-    "dev:server": "cd server && bun run dev",
-    "dev:shared": "cd shared && bun run dev",
-    "dev": "concurrently \"bun run dev:shared\" \"bun run dev:server\" \"bun run dev:client\"",
-    "build:client": "cd client && bun run build",
-    "build:shared": "cd shared && bun run build",
-    "build:server": "cd server && bun run build",
-    "build": "bun run build:shared && bun run build:server && bun run build:client",
-    "deploy:server": "cd server && bun run deploy",
-    "postinstall": "bun run build:shared && bun run build:server",
-    "test": "turbo test",
+    "dev": "turbo dev",
+    "dev:client": "turbo dev --filter=client",
+    "dev:server": "turbo dev --filter=server",
+    "dev:shared": "turbo dev --filter=shared",
+    "build": "turbo run build",
+    "build:client": "turbo run build --filter=client",
+    "build:server": "turbo run build --filter=server",
+    "build:shared": "turbo run build --filter=shared",
+    "deploy": "turbo run deploy",
+    "deploy:server": "turbo run deploy --filter=server",
+    "postinstall": "turbo run build --filter=shared --filter=server",
+    "test": "turbo run test",
+    "type-check": "turbo run type-check",
     "lint": "biome lint .",
     "format": "biome format . --write"
   },
@@ -37,8 +39,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.2.4",
     "bun-types": "latest",
-    "concurrently": "^9.2.1",
-    "turbo": "^2.5.5"
+    "turbo": "2.5.9-canary.0"
   },
   "peerDependencies": {
     "typescript": "^5.7.3"
