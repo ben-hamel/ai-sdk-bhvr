@@ -37,6 +37,7 @@ function Home() {
 			<h1 className="text-5xl font-black">bhvr</h1>
 			<h2 className="text-2xl font-bold">Bun + Hono + Vite + React</h2>
 			<p>A typesafe fullstack monorepo</p>
+			<p>4</p>
 			<div className="flex items-center gap-4">
 				<Button onClick={() => sendRequest()}>Call API</Button>
 				<Button variant="secondary" asChild>

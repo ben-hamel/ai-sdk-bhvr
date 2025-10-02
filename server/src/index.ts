@@ -13,7 +13,7 @@ app.get('/', (c) => {
 app.get('/hello', async (c) => {
 
   const data: ApiResponse = {
-    message: "Hello from Me 3",
+    message: "Hello from Me 4",
     success: true
   }
 
