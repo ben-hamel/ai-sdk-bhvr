@@ -13,7 +13,7 @@ app.get('/', (c) => {
 app.get('/hello', async (c) => {
 
   const data: ApiResponse = {
-    message: "Hello BHVR! New Backend Feature",
+    message: "Hello from Me",
     success: true
   }
 
