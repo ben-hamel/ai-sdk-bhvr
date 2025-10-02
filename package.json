@@ -20,7 +20,6 @@
     "build:client": "turbo run build --filter=client",
     "build:server": "turbo run build --filter=server",
     "build:shared": "turbo run build --filter=shared",
-    "deploy": "turbo run deploy",
     "deploy:server": "turbo run deploy --filter=server",
     "postinstall": "turbo run build --filter=shared --filter=server",
     "test": "turbo run test",
