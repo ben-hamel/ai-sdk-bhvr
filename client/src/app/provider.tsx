@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { queryConfig } from "@/lib/react-query";
-import { ThemeProvider } from "@/app/providers/theme-provider";
+import { ThemeProvider } from "@/providers/theme-provider";
 
 type AppProviderProps = {
   children?: React.ReactNode;
