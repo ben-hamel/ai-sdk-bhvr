@@ -1,8 +1,8 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import type { ApiResponse } from 'shared/dist'
-import { streamText } from 'ai';
-import {createGoogleGenerativeAI } from "@ai-sdk/google";
+import { convertToModelMessages, streamText, type UIMessage } from 'ai';
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
 type Bindings = {
   GOOGLE_GENERATIVE_AI_API_KEY: string
@@ -26,13 +26,20 @@ app.get('/hello', async (c) => {
   return c.json(data, { status: 200 })
 })
 
+
 app.post('/chat', async c => {
+  const { messages }: { messages: UIMessage[] } = await c.req.json();
+
+  
+
   const google = createGoogleGenerativeAI({
-  apiKey: c.env.GOOGLE_GENERATIVE_AI_API_KEY
-});
+    apiKey: c.env.GOOGLE_GENERATIVE_AI_API_KEY
+  });
+
   const result = streamText({
     model: google("gemini-2.5-pro"),
-    prompt: 'Invent a new holiday and describe its traditions.',
+    // prompt: 'Invent a new holiday and describe its traditions.',
+    messages: convertToModelMessages(messages),
   });
   return result.toUIMessageStreamResponse();
 });
