@@ -3,8 +3,8 @@ import beaver from "@/assets/beaver.svg";
 import type { ApiResponse } from "shared";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
+import { SERVER_URL } from "@/constants";
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:8787";
 
 function Home() {
 	const [data, setData] = useState<ApiResponse | undefined>();

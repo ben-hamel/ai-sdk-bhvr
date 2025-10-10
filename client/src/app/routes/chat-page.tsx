@@ -1,3 +1,4 @@
+import { SERVER_URL } from "@/constants";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useState } from "react";
@@ -6,7 +7,7 @@ import { useState } from "react";
 export const ChatPage = () => {
   const { messages, sendMessage, status, stop } = useChat({
     transport: new DefaultChatTransport({
-      api: `${import.meta.env.VITE_BASE_URL}/chat`,
+      api: `${SERVER_URL}/chat`,
     }),
   });
   const [input, setInput] = useState("");
