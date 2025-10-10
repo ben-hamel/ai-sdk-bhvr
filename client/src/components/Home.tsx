@@ -47,7 +47,7 @@ function Home() {
 				</Button>
 			</div>
 			{data && (
-				<pre className="bg-gray-100 p-4 rounded-md">
+				<pre className="bg-accent p-4 rounded-md">
 					<code>
 						Message: {data.message} <br />
 						Success: {data.success.toString()}
