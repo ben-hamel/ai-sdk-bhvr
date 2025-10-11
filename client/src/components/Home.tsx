@@ -3,8 +3,8 @@ import beaver from "@/assets/beaver.svg";
 import type { ApiResponse } from "shared";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
+import { SERVER_URL } from "@/constants";
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:8787";
 
 function Home() {
 	const [data, setData] = useState<ApiResponse | undefined>();
@@ -47,7 +47,7 @@ function Home() {
 				</Button>
 			</div>
 			{data && (
-				<pre className="bg-gray-100 p-4 rounded-md">
+				<pre className="bg-accent p-4 rounded-md">
 					<code>
 						Message: {data.message} <br />
 						Success: {data.success.toString()}

@@ -1,10 +1,6 @@
 {
   "name": "ai-sdk-bhvr",
-  "version": "0.4.0",
   "description": "A monorepo template built with Bun, Hono, Vite, and React",
-  "author": "Steve Simkins",
-  "license": "MIT",
-  "homepage": "https://github.com/stevedylandev/bhvr",
   "packageManager": "bun@1.2.4",
   "workspaces": [
     "./server",
@@ -15,30 +11,20 @@
     "dev": "turbo dev",
     "dev:client": "turbo dev --filter=client",
     "dev:server": "turbo dev --filter=server",
-    "dev:shared": "turbo dev --filter=shared",
-    "build": "turbo run build",
-    "build:client": "turbo run build --filter=client",
-    "build:server": "turbo run build --filter=server",
-    "build:shared": "turbo run build --filter=shared",
-    "deploy:server": "turbo run deploy --filter=server",
-    "postinstall": "turbo run build --filter=shared --filter=server",
-    "test": "turbo run test",
-    "type-check": "turbo run type-check",
+    "build": "turbo build",
+    "build:client": "turbo  build --filter=client",
+    "build:server": "turbo  build --filter=server",
+    "deploy:server": "turbo deploy --filter=server",
+    "type-check": "turbo type-check",
     "lint": "biome lint .",
+    "test": "turbo test",
+    "postinstall": "turbo build --filter=shared --filter=server",
     "format": "biome format . --write"
   },
-  "keywords": [
-    "bun",
-    "hono",
-    "react",
-    "vite",
-    "monorepo",
-    "turbo"
-  ],
   "devDependencies": {
     "@biomejs/biome": "^2.2.4",
     "bun-types": "latest",
-    "turbo": "2.5.9-canary.0"
+    "turbo": "2.5.9-canary.7"
   },
   "peerDependencies": {
     "typescript": "^5.7.3"

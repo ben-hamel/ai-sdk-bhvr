@@ -1,9 +1,6 @@
 import { createBrowserRouter } from "react-router";
 import Home from "@/components/Home";
-
-const Test = () => {
-  return <div>Test</div>;
-};
+import { ChatPage } from "@/app/routes/chat-page";
 
 export const router = createBrowserRouter([
   {
@@ -12,6 +9,6 @@ export const router = createBrowserRouter([
   },
   {
     path: "/chat",
-    Component: Test,
+    Component: ChatPage,
   },
 ]);

@@ -10,8 +10,11 @@
     "cf-typegen": "wrangler types --env-interface CloudflareBindings"
   },
   "dependencies": {
+    "@ai-sdk/google": "^2.0.17",
+    "ai": "^5.0.60",
     "hono": "^4.7.11",
-    "shared": "workspace:*"
+    "shared": "workspace:*",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/bun": "latest",
