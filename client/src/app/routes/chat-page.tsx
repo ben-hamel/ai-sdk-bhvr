@@ -1,83 +1,21 @@
-// import { SERVER_URL } from "@/constants";
-// import { useChat } from "@ai-sdk/react";
-// import { DefaultChatTransport } from "ai";
-// import { useState } from "react";
-
-
-// export const ChatPage = () => {
-//   const { messages, sendMessage, status, stop } = useChat({
-//     transport: new DefaultChatTransport({
-//       api: `${SERVER_URL}/chat`,
-//     }),
-//   });
-//   const [input, setInput] = useState("");
-
-//   return (
-//     <>
-//       {messages.map((message) => (
-//         <div key={message.id}>
-//           {message.role === "user" ? "User: " : "AI: "}
-//           {message.parts.map((part) =>
-//             part.type === "text" ? (
-//               <span key={part.text + part.type}>{part.text}</span>
-//             ) : null,
-//           )}
-//         </div>
-//       ))}
-
-//       {(status === "submitted" || status === "streaming") && (
-//         <div>
-//           {status === "submitted" && <Spinner />}
-//           <button type="button" onClick={() => stop()}>
-//             stop
-//           </button>
-//         </div>
-//       )}
-
-//       <form
-//         onSubmit={(e) => {
-//           e.preventDefault();
-//           if (input.trim()) {
-//             sendMessage({ text: input });
-//             setInput("");
-//           }
-//         }}
-//       >
-//         <input
-//           value={input}
-//           onChange={(e) => setInput(e.target.value)}
-//           disabled={status !== "ready"}
-//           placeholder="Say something..."
-//         />
-//         <button type="submit" disabled={status !== "ready"}>
-//           Submit
-//         </button>
-//       </form>
-//     </>
-//   );
-// }
-
-// //Spinner
-// const Spinner = () => {
-//   return (
-//     <div className="spinner">
-//       <p>Spinner</p>
-//     </div>
-//   );
-// };
-
 import {
   Context,
+  ContextCacheUsage,
   ContextContent,
-  ContextTrigger,
-  ContextContentHeader,
   ContextContentBody,
   ContextContentFooter,
+  ContextContentHeader,
   ContextInputUsage,
   ContextOutputUsage,
   ContextReasoningUsage,
-  ContextCacheUsage,
-} from '@/components/ai-elements/context';
+  ContextTrigger,
+} from "@/components/ai-elements/context";
+import {
+  Conversation,
+  ConversationContent,
+  ConversationScrollButton,
+} from "@/components/ai-elements/conversation";
+import { Message, MessageContent } from "@/components/ai-elements/message";
 import {
   PromptInput,
   PromptInputAttachment,
@@ -88,24 +26,18 @@ import {
   PromptInputTextarea,
   PromptInputToolbar,
   PromptInputTools,
-} from '@/components/ai-elements/prompt-input';
+} from "@/components/ai-elements/prompt-input";
+import { Response } from "@/components/ai-elements/response";
 import { SERVER_URL } from "@/constants";
-import { useRef, useState } from 'react';
-import { useChat } from '@ai-sdk/react';
-import {
-  Conversation,
-  ConversationContent,
-  ConversationScrollButton,
-} from '@/components/ai-elements/conversation';
+import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { Message, MessageContent } from '@/components/ai-elements/message';
-import { Response } from '@/components/ai-elements/response';
+import { useRef, useState } from "react";
 
 export const ChatPage = () => {
-  const [text, setText] = useState<string>('');
+  const [text, setText] = useState<string>("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const { messages, status, sendMessage } =useChat({
+  const { messages, status, sendMessage } = useChat({
     transport: new DefaultChatTransport({
       api: `${SERVER_URL}/chat`,
     }),
@@ -120,17 +52,17 @@ export const ChatPage = () => {
     }
 
     sendMessage(
-      { 
-        text: message.text || 'Sent with attachments',
-        files: message.files 
+      {
+        text: message.text || "Sent with attachments",
+        files: message.files,
       },
       {
         body: {
           webSearch: false,
         },
-      }
+      },
     );
-    setText('');
+    setText("");
   };
 
   return (
@@ -143,7 +75,7 @@ export const ChatPage = () => {
                 <MessageContent>
                   {message.parts.map((part, i) => {
                     switch (part.type) {
-                      case 'text':
+                      case "text":
                         return (
                           <Response key={`${message.id}-${i}`}>
                             {part.text}
@@ -160,7 +92,12 @@ export const ChatPage = () => {
           <ConversationScrollButton />
         </Conversation>
 
-        <PromptInput onSubmit={handleSubmit} className="mt-4" globalDrop multiple>
+        <PromptInput
+          onSubmit={handleSubmit}
+          className="mt-4"
+          globalDrop
+          multiple
+        >
           <PromptInputBody>
             <PromptInputAttachments>
               {(attachment) => <PromptInputAttachment data={attachment} />}
@@ -173,26 +110,29 @@ export const ChatPage = () => {
           </PromptInputBody>
           <PromptInputToolbar>
             <PromptInputTools>
-                <Context maxTokens={128_000} usage={{
-          inputTokens: 32_000,
-          outputTokens: 8000,
-          totalTokens: 40_000,
-          cachedInputTokens: 0,
-          reasoningTokens: 0,
-        }}
-        usedTokens={40_000}>
-                  <ContextTrigger />
-                  <ContextContent>
-                    <ContextContentHeader />
-    <ContextContentBody>
-      <ContextInputUsage />
-      <ContextOutputUsage />
-      <ContextReasoningUsage />
-      <ContextCacheUsage />
-    </ContextContentBody>
-    <ContextContentFooter />
-                  </ContextContent>
-                </Context>
+              <Context
+                maxTokens={128_000}
+                usage={{
+                  inputTokens: 32_000,
+                  outputTokens: 8000,
+                  totalTokens: 40_000,
+                  cachedInputTokens: 0,
+                  reasoningTokens: 0,
+                }}
+                usedTokens={40_000}
+              >
+                <ContextTrigger />
+                <ContextContent>
+                  <ContextContentHeader />
+                  <ContextContentBody>
+                    <ContextInputUsage />
+                    <ContextOutputUsage />
+                    <ContextReasoningUsage />
+                    <ContextCacheUsage />
+                  </ContextContentBody>
+                  <ContextContentFooter />
+                </ContextContent>
+              </Context>
             </PromptInputTools>
             <PromptInputSubmit disabled={!text && !status} status={status} />
           </PromptInputToolbar>
@@ -201,4 +141,3 @@ export const ChatPage = () => {
     </div>
   );
 };
-
