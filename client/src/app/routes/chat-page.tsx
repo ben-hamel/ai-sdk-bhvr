@@ -31,17 +31,32 @@ import { Response } from "@/components/ai-elements/response";
 import { SERVER_URL } from "@/constants";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import type { CustomMessage } from "@shared/types";
 
 export const ChatPage = () => {
   const [text, setText] = useState<string>("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const { messages, status, sendMessage } = useChat({
+  const { messages, status, sendMessage } = useChat<CustomMessage>({
     transport: new DefaultChatTransport({
       api: `${SERVER_URL}/chat`,
     }),
   });
+
+  const tokenUsage = useMemo(() => {
+    return messages.reduce(
+      (acc, message) => {
+        return {
+          inputTokens: acc.inputTokens + (message.metadata?.inputTokens || 0),
+          outputTokens: acc.outputTokens + (message.metadata?.outputTokens || 0),
+          totalTokens: acc.totalTokens + (message.metadata?.totalTokens || 0),
+        };
+      },
+      { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
+    );
+  }, [messages]);
+
 
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
@@ -87,6 +102,7 @@ export const ChatPage = () => {
                   })}
                 </MessageContent>
               </Message>
+
             ))}
           </ConversationContent>
           <ConversationScrollButton />
@@ -111,15 +127,15 @@ export const ChatPage = () => {
           <PromptInputToolbar>
             <PromptInputTools>
               <Context
-                maxTokens={128_000}
+                maxTokens={1_114_112}
                 usage={{
-                  inputTokens: 32_000,
-                  outputTokens: 8000,
-                  totalTokens: 40_000,
+                  inputTokens: tokenUsage.inputTokens,
+                  outputTokens: tokenUsage.outputTokens,
+                  totalTokens: tokenUsage.totalTokens,
                   cachedInputTokens: 0,
                   reasoningTokens: 0,
                 }}
-                usedTokens={40_000}
+                usedTokens={tokenUsage.totalTokens}
               >
                 <ContextTrigger />
                 <ContextContent>
