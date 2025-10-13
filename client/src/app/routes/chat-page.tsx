@@ -140,13 +140,13 @@ export const ChatPage = () => {
                 <ContextTrigger />
                 <ContextContent>
                   <ContextContentHeader />
-                  <ContextContentBody>
+                  {/* <ContextContentBody>
                     <ContextInputUsage />
                     <ContextOutputUsage />
                     <ContextReasoningUsage />
                     <ContextCacheUsage />
-                  </ContextContentBody>
-                  <ContextContentFooter />
+                  </ContextContentBody> 
+                  <ContextContentFooter /> */}
                 </ContextContent>
               </Context>
             </PromptInputTools>
