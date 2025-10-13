@@ -1,67 +1,153 @@
+import {
+  Context,
+  ContextContent,
+  ContextContentHeader,
+  ContextTrigger,
+} from "@/components/ai-elements/context";
+import {
+  Conversation,
+  ConversationContent,
+  ConversationScrollButton,
+} from "@/components/ai-elements/conversation";
+import { Message, MessageContent } from "@/components/ai-elements/message";
+import {
+  PromptInput,
+  PromptInputAttachment,
+  PromptInputAttachments,
+  PromptInputBody,
+  type PromptInputMessage,
+  PromptInputSubmit,
+  PromptInputTextarea,
+  PromptInputToolbar,
+  PromptInputTools,
+} from "@/components/ai-elements/prompt-input";
+import { Response } from "@/components/ai-elements/response";
 import { SERVER_URL } from "@/constants";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useState } from "react";
-
+import { useMemo, useRef, useState } from "react";
+import type { CustomMessage } from "@shared/types";
 
 export const ChatPage = () => {
-  const { messages, sendMessage, status, stop } = useChat({
+  const [text, setText] = useState<string>("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const { messages, status, sendMessage } = useChat<CustomMessage>({
     transport: new DefaultChatTransport({
       api: `${SERVER_URL}/chat`,
     }),
   });
-  const [input, setInput] = useState("");
+
+  const tokenUsage = useMemo(() => {
+    return messages.reduce(
+      (acc, message) => {
+        return {
+          inputTokens: acc.inputTokens + (message.metadata?.inputTokens || 0),
+          outputTokens: acc.outputTokens + (message.metadata?.outputTokens || 0),
+          totalTokens: acc.totalTokens + (message.metadata?.totalTokens || 0),
+        };
+      },
+      { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
+    );
+  }, [messages]);
+
+
+  const handleSubmit = (message: PromptInputMessage) => {
+    const hasText = Boolean(message.text);
+    const hasAttachments = Boolean(message.files?.length);
+
+    if (!(hasText || hasAttachments)) {
+      return;
+    }
+
+    sendMessage(
+      {
+        text: message.text || "Sent with attachments",
+        files: message.files,
+      },
+      {
+        body: {
+          webSearch: false,
+        },
+      },
+    );
+    setText("");
+  };
 
   return (
-    <>
-      {messages.map((message) => (
-        <div key={message.id}>
-          {message.role === "user" ? "User: " : "AI: "}
-          {message.parts.map((part) =>
-            part.type === "text" ? (
-              <span key={part.text + part.type}>{part.text}</span>
-            ) : null,
-          )}
-        </div>
-      ))}
+    <div className="max-w-4xl mx-auto p-6 relative size-full rounded-lg border h-[600px]">
+      <div className="flex flex-col h-full">
+        <Conversation>
+          <ConversationContent>
+            {messages.map((message) => (
+              <Message from={message.role} key={message.id}>
+                <MessageContent>
+                  {message.parts.map((part, i) => {
+                    switch (part.type) {
+                      case "text":
+                        return (
+                          <Response key={`${message.id}-${i}`}>
+                            {part.text}
+                          </Response>
+                        );
+                      default:
+                        return null;
+                    }
+                  })}
+                </MessageContent>
+              </Message>
 
-      {(status === "submitted" || status === "streaming") && (
-        <div>
-          {status === "submitted" && <Spinner />}
-          <button type="button" onClick={() => stop()}>
-            stop
-          </button>
-        </div>
-      )}
+            ))}
+          </ConversationContent>
+          <ConversationScrollButton />
+        </Conversation>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (input.trim()) {
-            sendMessage({ text: input });
-            setInput("");
-          }
-        }}
-      >
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          disabled={status !== "ready"}
-          placeholder="Say something..."
-        />
-        <button type="submit" disabled={status !== "ready"}>
-          Submit
-        </button>
-      </form>
-    </>
-  );
-}
-
-//Spinner
-const Spinner = () => {
-  return (
-    <div className="spinner">
-      <p>Spinner</p>
+        <PromptInput
+          onSubmit={handleSubmit}
+          className="mt-4"
+          globalDrop
+          multiple
+        >
+          <PromptInputBody>
+            <PromptInputAttachments>
+              {(attachment) => <PromptInputAttachment data={attachment} />}
+            </PromptInputAttachments>
+            <PromptInputTextarea
+              onChange={(e) => setText(e.target.value)}
+              ref={textareaRef}
+              value={text}
+            />
+          </PromptInputBody>
+          <PromptInputToolbar>
+            <PromptInputTools>
+              <Context
+                maxTokens={1_114_112}
+                usage={{
+                  inputTokens: tokenUsage.inputTokens,
+                  outputTokens: tokenUsage.outputTokens,
+                  totalTokens: tokenUsage.totalTokens,
+                  cachedInputTokens: 0,
+                  reasoningTokens: 0,
+                }}
+                usedTokens={tokenUsage.totalTokens}
+              >
+                <ContextTrigger />
+                <ContextContent>
+                  <ContextContentHeader />
+                  {/* <ContextContentBody>
+                    <ContextInputUsage />
+                    <ContextOutputUsage />
+                    <ContextReasoningUsage />
+                    <ContextCacheUsage />
+                  </ContextContentBody> 
+                  <ContextContentFooter /> */}
+                </ContextContent>
+              </Context>
+            </PromptInputTools>
+            <PromptInputSubmit disabled={!text && !status} status={status} />
+          </PromptInputToolbar>
+        </PromptInput>
+      </div>
     </div>
   );
 };
