@@ -17,3 +17,9 @@ bun dev
 ```
 
 This will start the client and server in parallel.
+
+
+install packages example
+```bash
+ bun add -D @types/pg --cwd server   
+```

@@ -3,9 +3,11 @@ import { cors } from "hono/cors";
 import type { ApiResponse } from "shared/dist";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { Pool } from "pg";
 
 type Bindings = {
   GOOGLE_GENERATIVE_AI_API_KEY: string;
+  DATABASE_URL: string;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -23,6 +25,19 @@ app.get("/hello", async (c) => {
   };
 
   return c.json(data, { status: 200 });
+});
+
+app.get("/db", async (c) => {
+  const pool = new Pool({ connectionString: c.env.DATABASE_URL });
+  try {
+    const { rows } = await pool.query("SELECT * FROM users");
+    return c.json(rows);
+  } catch (error) {
+    console.error(error);
+    return c.json({ error: "Failed to fetch users" }, { status: 500 });
+  } finally {
+    pool.end();
+  }
 });
 
 app.post("/chat", async (c) => {

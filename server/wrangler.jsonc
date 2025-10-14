@@ -2,10 +2,8 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "ai-sdk-bhvr-server",
   "main": "src/index.ts",
-  "compatibility_date": "2025-05-25"
-  // "compatibility_flags": [
-  //   "nodejs_compat"
-  // ],
+  "compatibility_date": "2025-05-25",
+  "compatibility_flags": ["nodejs_compat"]
   // "vars": {
   //   "MY_VAR": "my-variable"
   // },
