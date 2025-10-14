@@ -20,7 +20,7 @@ app.get("/", (c) => {
 
 app.get("/hello", async (c) => {
   const data: ApiResponse = {
-    message: "Hello from Me 4",
+    message: "Hello BHVR!",
     success: true,
   };
 
