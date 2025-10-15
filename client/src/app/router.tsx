@@ -8,7 +8,7 @@ export const router = createBrowserRouter([
     Component: Home,
   },
   {
-    path: "/chat",
+    path: "/chat/:chatId",
     Component: ChatPage,
   },
 ]);
