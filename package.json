@@ -1,32 +1,36 @@
 {
-	"name": "ai-sdk-bhvr",
-	"description": "A monorepo template built with Bun, Hono, Vite, and React",
-	"packageManager": "bun@1.2.4",
-	"workspaces": [
-		"./server",
-		"./client",
-		"./shared"
-	],
-	"scripts": {
-		"dev": "turbo dev",
-		"dev:client": "turbo dev --filter=client",
-		"dev:server": "turbo dev --filter=server",
-		"build": "turbo build",
-		"build:client": "turbo  build --filter=client",
-		"build:server": "turbo  build --filter=server",
-		"deploy:server": "turbo deploy --filter=server",
-		"type-check": "turbo type-check",
-		"lint": "biome lint .",
-		"test": "turbo test",
-		"postinstall": "turbo build --filter=shared --filter=server",
-		"format": "biome format . --write"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "2.2.5",
-		"bun-types": "latest",
-		"turbo": "2.5.9-canary.7"
-	},
-	"peerDependencies": {
-		"typescript": "^5.7.3"
-	}
+  "name": "ai-sdk-bhvr",
+  "description": "A monorepo template built with Bun, Hono, Vite, and React",
+  "packageManager": "bun@1.2.4",
+  "workspaces": [
+    "./server",
+    "./client",
+    "./shared"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "dev:client": "turbo dev --filter=client",
+    "dev:server": "turbo dev --filter=server",
+    "build": "turbo build",
+    "build:client": "turbo  build --filter=client",
+    "build:server": "turbo  build --filter=server",
+    "deploy:server": "turbo deploy --filter=server",
+    "db:start": "turbo -F server db:start",
+    "db:watch": "turbo -F server db:watch",
+    "db:stop": "turbo -F server db:stop",
+    "db:down": "turbo -F server db:down",
+    "type-check": "turbo type-check",
+    "lint": "biome lint .",
+    "test": "turbo test",
+    "postinstall": "turbo build --filter=shared --filter=server",
+    "format": "biome format . --write"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.2.5",
+    "bun-types": "latest",
+    "turbo": "2.5.9-canary.7"
+  },
+  "peerDependencies": {
+    "typescript": "^5.7.3"
+  }
 }
