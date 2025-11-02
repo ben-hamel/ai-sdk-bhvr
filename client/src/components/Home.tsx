@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import beaver from "@/assets/beaver.svg";
 import type { ApiResponse } from "shared";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { SERVER_URL } from "@/constants";
 
 function Home() {
 	const [data, setData] = useState<ApiResponse | undefined>();
+	const navigate = useNavigate();
 
 	const { mutate: sendRequest } = useMutation({
 		mutationFn: async () => {
@@ -18,6 +20,19 @@ function Home() {
 			} catch (error) {
 				console.log(error);
 			}
+		},
+	});
+
+	const { mutate: createChat, isPending: isCreatingChat } = useMutation({
+		mutationFn: async () => {
+			const res = await fetch(`${SERVER_URL}/chats`, { method: "POST" });
+			if (!res.ok) {
+				throw new Error("Failed to create chat");
+			}
+			return res.json() as Promise<{ id: string }>;
+		},
+		onSuccess: (data) => {
+			navigate(`/chat/${data.id}`);
 		},
 	});
 
@@ -37,8 +52,10 @@ function Home() {
 			<h1 className="text-5xl font-black">bhvr</h1>
 			<h2 className="text-2xl font-bold">Bun + Hono + Vite + React</h2>
 			<p>A typesafe fullstack monorepo</p>
-			<p>4</p>
 			<div className="flex items-center gap-4">
+				<Button onClick={() => createChat()} disabled={isCreatingChat}>
+					{isCreatingChat ? "Creating..." : "New Chat"}
+				</Button>
 				<Button onClick={() => sendRequest()}>Call API</Button>
 				<Button variant="secondary" asChild>
 					<a target="_blank" href="https://bhvr.dev" rel="noopener">

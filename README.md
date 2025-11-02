@@ -16,4 +16,15 @@ Then, to start the development servers:
 bun dev
 ```
 
-This will start the client and server in parallel.
+install packages example
+```bash
+ bun add -D @types/pg --cwd server   
+```
+
+## Run the db
+
+To run the PostgreSQL database using Docker, use the following command:
+
+```bash
+bun db:start
+```

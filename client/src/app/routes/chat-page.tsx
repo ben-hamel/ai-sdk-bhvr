@@ -25,18 +25,42 @@ import { Response } from "@/components/ai-elements/response";
 import { SERVER_URL } from "@/constants";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useParams } from "react-router";
 import type { CustomMessage } from "@shared/types";
+import { useQuery } from "@tanstack/react-query";
 
 export const ChatPage = () => {
   const [text, setText] = useState<string>("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { chatId } = useParams<{ chatId: string }>();
 
-  const { messages, status, sendMessage } = useChat<CustomMessage>({
+  const { messages, status, sendMessage, setMessages } = useChat<CustomMessage>({
     transport: new DefaultChatTransport({
       api: `${SERVER_URL}/chat`,
     }),
   });
+
+  // Load chat history when chatId is present using TanStack Query
+  const { data: chatHistory } = useQuery({
+    queryKey: ["chat", chatId],
+    queryFn: async () => {
+      const res = await fetch(`${SERVER_URL}/chats/${chatId}/messages`);
+      if (!res.ok) {
+        throw new Error("Failed to load chat history");
+      }
+      return res.json() as Promise<CustomMessage[]>;
+    },
+    enabled: !!chatId,
+  });
+
+  // Set messages when chat history is loaded
+  useEffect(() => {
+    if (chatHistory) {
+      console.log("Loaded chat history:", chatHistory);
+      setMessages(chatHistory);
+    }
+  }, [chatHistory, setMessages]);
 
   const tokenUsage = useMemo(() => {
     return messages.reduce(
@@ -67,6 +91,7 @@ export const ChatPage = () => {
       },
       {
         body: {
+          chatId,
           webSearch: false,
         },
       },
@@ -134,13 +159,6 @@ export const ChatPage = () => {
                 <ContextTrigger />
                 <ContextContent>
                   <ContextContentHeader />
-                  {/* <ContextContentBody>
-                    <ContextInputUsage />
-                    <ContextOutputUsage />
-                    <ContextReasoningUsage />
-                    <ContextCacheUsage />
-                  </ContextContentBody> 
-                  <ContextContentFooter /> */}
                 </ContextContent>
               </Context>
             </PromptInputTools>

@@ -90,6 +90,23 @@
       ],
       "outputs": ["coverage/**", ".nyc_output/**", "test-results/**"],
       "env": ["NODE_ENV", "CI"]
+    },
+    "db:start": {
+      "cache": false,
+      "inputs": ["docker-compose.yml"]
+    },
+    "db:watch": {
+      "cache": false,
+      "persistent": true,
+      "inputs": ["docker-compose.yml"]
+    },
+    "db:stop": {
+      "cache": false,
+      "inputs": ["docker-compose.yml"]
+    },
+    "db:down": {
+      "cache": false,
+      "inputs": ["docker-compose.yml"]
     }
   },
   "globalDependencies": [
