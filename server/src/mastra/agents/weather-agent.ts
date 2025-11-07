@@ -23,7 +23,7 @@ export const weatherAgent = new Agent({
   memory: new Memory({
     storage: new PostgresStore({
       connectionString: process.env.DATABASE_URL!,
-      schemaName: "custom_schema", // optionald
+      // schemaName: "custom_schema", // this will save to differnt schema (not public in postgres)
     }),
     vector: new PgVector({
       connectionString: process.env.DATABASE_URL!,
