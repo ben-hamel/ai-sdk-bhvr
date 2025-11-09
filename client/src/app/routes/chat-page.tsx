@@ -37,7 +37,7 @@ export const ChatPage = () => {
 
   const { messages, status, sendMessage, setMessages } = useChat<CustomMessage>({
     transport: new DefaultChatTransport({
-      api: `${SERVER_URL}/chat`,
+      api: `${SERVER_URL}/chats/${chatId}/messages`,
     }),
   });
 
