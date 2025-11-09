@@ -2,7 +2,7 @@ name: ai-sdk-bhvr
 
 services:
   postgres:
-    image: postgres:18-alpine
+    image: pgvector/pgvector:pg17 # PostgreSQL with pgvector support
     container_name: ai-sdk-bhvr-postgres
     environment:
       POSTGRES_DB: ai-sdk-bhvr
