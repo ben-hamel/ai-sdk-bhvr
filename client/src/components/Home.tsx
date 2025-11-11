@@ -14,7 +14,7 @@ function Home() {
 	const { mutate: sendRequest } = useMutation({
 		mutationFn: async () => {
 			try {
-				const req = await fetch(`${SERVER_URL}/hello`);
+				const req = await fetch(`${SERVER_URL}/api/v1/hello`);
 				const res: ApiResponse = await req.json();
 				setData(res);
 			} catch (error) {
@@ -25,7 +25,7 @@ function Home() {
 
 	const { mutate: createChat, isPending: isCreatingChat } = useMutation({
 		mutationFn: async () => {
-			const res = await fetch(`${SERVER_URL}/chats`, { method: "POST" });
+			const res = await fetch(`${SERVER_URL}/api/v1/chats`, { method: "POST" });
 			if (!res.ok) {
 				throw new Error("Failed to create chat");
 			}

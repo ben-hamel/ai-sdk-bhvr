@@ -3,7 +3,13 @@
   "name": "ai-sdk-bhvr-server",
   "main": "src/index.ts",
   "compatibility_date": "2025-05-25",
-  "compatibility_flags": ["nodejs_compat"]
+  "compatibility_flags": ["nodejs_compat"],
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "ad4658e8d3b045f9b968efa6f8e1ae59"
+    }
+  ]
   // "vars": {
   //   "MY_VAR": "my-variable"
   // },

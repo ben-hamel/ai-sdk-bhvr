@@ -37,7 +37,7 @@ export const ChatPage = () => {
 
   const { messages, status, sendMessage, setMessages } = useChat<CustomMessage>({
     transport: new DefaultChatTransport({
-      api: `${SERVER_URL}/chats/${chatId}/messages`,
+      api: `${SERVER_URL}/api/v1/chats/${chatId}/messages`,
     }),
   });
 
@@ -45,7 +45,7 @@ export const ChatPage = () => {
   const { data: chatHistory } = useQuery({
     queryKey: ["chat", chatId],
     queryFn: async () => {
-      const res = await fetch(`${SERVER_URL}/chats/${chatId}/messages`);
+      const res = await fetch(`${SERVER_URL}/api/v1/chats/${chatId}/messages`);
       if (!res.ok) {
         throw new Error("Failed to load chat history");
       }

@@ -1,16 +1,15 @@
-import { Pool } from "pg";
+import { db } from "../../db";
+import { usersTable } from "../../db/schema/users";
 
-/**
- * Get all users from the database
- * @param databaseUrl - PostgreSQL connection string
- * @returns Array of user records
- */
-export async function getAllUsers(databaseUrl: string) {
-  const pool = new Pool({ connectionString: databaseUrl });
-  try {
-    const { rows } = await pool.query("SELECT * FROM users");
-    return rows;
-  } finally {
-    await pool.end();
-  }
+export async function getAllUsers() {
+  return await db.select().from(usersTable);
+}
+
+export async function insertUser(data: {
+  name: string;
+  age: number;
+  email: string;
+}) {
+  const [user] = await db.insert(usersTable).values(data).returning();
+  return user;
 }
