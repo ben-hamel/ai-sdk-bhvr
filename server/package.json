@@ -33,6 +33,6 @@
     "@types/pg": "^8.15.6",
     "drizzle-kit": "^0.31.6",
     "mastra": "^0.17.7",
-    "wrangler": "^4.42.2"
+    "wrangler": "^4.46.0"
   }
 }
