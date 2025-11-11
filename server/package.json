@@ -10,6 +10,7 @@
     "build:mast": "mastra build",
     "deploy": "wrangler deploy --minify",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "db:generate": "drizzle-kit generate",
     "db:start": "docker compose up -d",
     "db:watch": "docker compose up",
     "db:stop": "docker compose stop",
@@ -30,6 +31,7 @@
   "devDependencies": {
     "@mastra/core": "^0.23.3",
     "@types/bun": "latest",
+    "@types/node": "^24.10.0",
     "@types/pg": "^8.15.6",
     "drizzle-kit": "^0.31.6",
     "mastra": "^0.17.7",
