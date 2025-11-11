@@ -8,4 +8,10 @@
     "enabled": true,
     "head_sampling_rate": 1
   }
+  // "hyperdrive": [
+  // 	{
+  // 		"binding": "HYPERDRIVE",
+  // 		"id": "859366a18a4e4a299b0eab588ae0cb2c"
+  // 	}
+  // ]
 }

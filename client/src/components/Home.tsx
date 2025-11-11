@@ -63,6 +63,11 @@ function Home() {
 					</a>
 				</Button>
 			</div>
+			<div className="flex items-center gap-4">
+				<Button variant="outline" asChild>
+					<a href="/users">View Users</a>
+				</Button>
+			</div>
 			{data && (
 				<pre className="bg-accent p-4 rounded-md">
 					<code>

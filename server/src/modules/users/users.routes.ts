@@ -1,16 +1,26 @@
 import { Hono } from "hono";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import { dbMiddleware } from "../../middleware/db";
 import * as userService from "./users.service";
 
 type Bindings = {
   DATABASE_URL: string;
 };
 
-const users = new Hono<{ Bindings: Bindings }>();
+type Variables = {
+  db: NodePgDatabase;
+};
+
+const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
+
+// Apply db middleware to all user routes
+app.use("*", dbMiddleware);
 
 // Get all users
-users.get("/", async (c) => {
+app.get("/", async (c) => {
   try {
-    const allUsers = await userService.getUsers();
+    const db = c.get("db");
+    const allUsers = await userService.getUsers(db);
     return c.json(allUsers);
   } catch (error) {
     console.error(error);
@@ -19,10 +29,11 @@ users.get("/", async (c) => {
 });
 
 // Create a new user
-users.post("/", async (c) => {
+app.post("/", async (c) => {
   try {
+    const db = c.get("db");
     const body = await c.req.json();
-    const newUser = await userService.createUser(body);
+    const newUser = await userService.createUser(db, body);
     return c.json(newUser, { status: 201 });
   } catch (error) {
     console.error(error);
@@ -30,4 +41,4 @@ users.post("/", async (c) => {
   }
 });
 
-export default users;
+export default app;

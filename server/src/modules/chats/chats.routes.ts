@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import type { UIMessage } from "ai";
+import { createDb } from "../../db";
 import * as chatService from "./chats.service";
 
 type Bindings = {
@@ -7,12 +8,13 @@ type Bindings = {
   DATABASE_URL: string;
 };
 
-const chats = new Hono<{ Bindings: Bindings }>();
+const app = new Hono<{ Bindings: Bindings }>();
 
 // Get all chats
-chats.get("/", async (c) => {
+app.get("/", async (c) => {
   try {
-    const allChats = await chatService.getAllChats(c.env.DATABASE_URL);
+    const db = createDb(c.env.DATABASE_URL);
+    const allChats = await chatService.getAllChats(db);
     return c.json(allChats);
   } catch (error) {
     console.error(error);
@@ -21,9 +23,10 @@ chats.get("/", async (c) => {
 });
 
 // Create new chat
-chats.post("/", async (c) => {
+app.post("/", async (c) => {
   try {
-    const chat = await chatService.createChat(c.env.DATABASE_URL);
+    const db = createDb(c.env.DATABASE_URL);
+    const chat = await chatService.createChat(db);
     return c.json(chat);
   } catch (error) {
     console.error(error);
@@ -32,11 +35,12 @@ chats.post("/", async (c) => {
 });
 
 // Get chat history by chat ID
-chats.get("/:chatId/messages", async (c) => {
+app.get("/:chatId/messages", async (c) => {
   const chatId = c.req.param("chatId");
 
   try {
-    const messages = await chatService.getChatMessages(chatId, c.env.DATABASE_URL);
+    const db = createDb(c.env.DATABASE_URL);
+    const messages = await chatService.getChatMessages(db, chatId);
     return c.json(messages);
   } catch (error) {
     console.error(error);
@@ -45,15 +49,16 @@ chats.get("/:chatId/messages", async (c) => {
 });
 
 // Chat streaming endpoint
-chats.post("/:chatId/messages", async (c) => {
+app.post("/:chatId/messages", async (c) => {
   const chatId = c.req.param("chatId");
   const { messages }: { messages: UIMessage[] } = await c.req.json();
 
   try {
+    const db = createDb(c.env.DATABASE_URL);
     return await chatService.streamChatMessages(
+      db,
       chatId,
       messages,
-      c.env.DATABASE_URL,
       c.env.GOOGLE_GENERATIVE_AI_API_KEY,
     );
   } catch (error) {
@@ -62,4 +67,4 @@ chats.post("/:chatId/messages", async (c) => {
   }
 });
 
-export default chats;
+export default app;

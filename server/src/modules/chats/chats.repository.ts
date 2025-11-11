@@ -1,226 +1,216 @@
 import type { UIMessage } from "ai";
-import { Pool } from "pg";
+import { asc, eq, sql } from "drizzle-orm";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import { chats, messages } from "../../db/schema/chats";
+import { parts } from "../../db/schema/parts";
 
 /**
  * Save chat messages to the database using parts-based storage
+ * @param db - Database connection instance
  * @param chatId - The UUID of the chat session
  * @param messages - Array of UI messages to save
- * @param databaseUrl - PostgreSQL connection string
  */
-export async function saveChat({
-  chatId,
-  messages,
-  databaseUrl,
-}: {
-  chatId: string;
-  messages: UIMessage[];
-  databaseUrl: string;
-}): Promise<void> {
-  const pool = new Pool({ connectionString: databaseUrl });
-
+export async function saveChat(
+  db: NodePgDatabase,
+  {
+    chatId,
+    messages: uiMessages,
+  }: {
+    chatId: string;
+    messages: UIMessage[];
+  },
+): Promise<void> {
   try {
     console.log("saveChat: Saving messages to database...");
     console.log(`saveChat: Chat ID: ${chatId}`);
-    console.log(`saveChat: Total messages to save: ${messages.length}`);
+    console.log(`saveChat: Total messages to save: ${uiMessages.length}`);
 
     // Begin transaction
-    await pool.query("BEGIN");
+    await db.transaction(async (tx) => {
+      // Save all messages with their parts
+      for (const message of uiMessages) {
+        console.log(`saveChat: Saving message ${message.id} (${message.role})`);
 
-    // Save all messages with their parts
-    for (const message of messages) {
-      console.log(`saveChat: Saving message ${message.id} (${message.role})`);
+        // Insert or update message
+        await tx
+          .insert(messages)
+          .values({
+            id: message.id,
+            chatId,
+            role: message.role as "user" | "assistant" | "system" | "tool",
+          })
+          .onConflictDoNothing();
 
-      // Insert or update message
-      await pool.query(
-        "INSERT INTO messages (id, chat_id, role, created_at) VALUES ($1, $2, $3, NOW()) ON CONFLICT (id) DO NOTHING",
-        [message.id, chatId, message.role],
-      );
+        // Delete existing parts for this message to handle updates
+        await tx.delete(parts).where(eq(parts.messageId, message.id));
 
-      // Delete existing parts for this message to handle updates
-      await pool.query("DELETE FROM parts WHERE message_id = $1", [message.id]);
+        // Insert all parts for this message
+        for (let i = 0; i < message.parts.length; i++) {
+          const part = message.parts[i];
+          if (!part) continue;
 
-      // Insert all parts for this message
-      for (let i = 0; i < message.parts.length; i++) {
-        const part = message.parts[i];
-        if (!part) continue;
+          // Build the part values based on type
+          const partValues: {
+            messageId: string;
+            type: string;
+            order: number;
+            textContent?: string;
+            reasoningContent?: string;
+            fileUrl?: string;
+            fileName?: string;
+            fileMimeType?: string;
+            toolCallId?: string;
+            toolCallName?: string;
+            toolCallArgs?: unknown;
+            toolResultId?: string;
+            toolResultName?: string;
+            toolResultResult?: unknown;
+            toolResultIsError?: boolean;
+            providerMetadata?: unknown;
+          } = {
+            messageId: message.id,
+            type: part.type,
+            order: i,
+          };
 
-        // Base values for all parts
-        const values: unknown[] = [
-          message.id, // message_id
-          part.type, // type
-          i, // order
-        ];
-
-        // Build dynamic column list and values based on part type
-        let columns = 'message_id, type, "order"';
-        let placeholders = "$1, $2, $3";
-        let paramIndex = 4;
-
-        // Text part
-        if (part.type === "text" && "text" in part) {
-          columns += ", text_content";
-          placeholders += `, $${paramIndex++}`;
-          values.push(part.text);
-        }
-
-        // Reasoning part
-        else if (part.type === "reasoning" && "reasoning" in part) {
-          columns += ", reasoning_content";
-          placeholders += `, $${paramIndex++}`;
-          values.push(part.reasoning);
-        }
-
-        // File part
-        else if (part.type === "file" && "data" in part) {
-          columns += ", file_url, file_name";
-          placeholders += `, $${paramIndex++}, $${paramIndex++}`;
-          const dataStr =
-            typeof part.data === "string"
-              ? part.data
-              : part.data instanceof URL
-                ? part.data.toString()
-                : String(part.data);
-          values.push(dataStr, "name" in part ? part.name : "file");
-
-          if ("mimeType" in part && part.mimeType) {
-            columns += ", file_mime_type";
-            placeholders += `, $${paramIndex++}`;
-            values.push(part.mimeType);
+          // Text part
+          if (part.type === "text" && "text" in part) {
+            partValues.textContent = part.text;
           }
-        }
 
-        // Dynamic tool parts (tool calls and results)
-        else if (part.type === "dynamic-tool") {
-          if ("output" in part && part.output !== undefined) {
-            // This is a tool result
-            columns += ", tool_result_id, tool_result_name, tool_result_result";
-            placeholders += `, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}`;
-            values.push(
-              part.toolCallId,
-              part.toolName,
-              JSON.stringify(part.output),
-            );
+          // Reasoning part
+          else if (part.type === "reasoning" && "reasoning" in part) {
+            partValues.reasoningContent = String(part.reasoning);
+          }
 
-            if ("errorText" in part && part.errorText) {
-              columns += ", tool_result_is_error";
-              placeholders += `, $${paramIndex++}`;
-              values.push(true);
+          // File part
+          else if (part.type === "file" && "data" in part) {
+            const dataStr =
+              typeof part.data === "string"
+                ? part.data
+                : part.data instanceof URL
+                  ? part.data.toString()
+                  : String(part.data);
+            partValues.fileUrl = dataStr;
+            partValues.fileName = "name" in part ? String(part.name) : "file";
+
+            if ("mimeType" in part && part.mimeType) {
+              partValues.fileMimeType = String(part.mimeType);
             }
-          } else {
-            // This is a tool call
-            columns += ", tool_call_id, tool_call_name, tool_call_args";
-            placeholders += `, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}`;
-            values.push(
-              part.toolCallId,
-              part.toolName,
-              JSON.stringify(part.input || {}),
-            );
           }
-        }
 
-        // Provider metadata (if present)
-        if ("providerMetadata" in part && part.providerMetadata) {
-          columns += ", provider_metadata";
-          placeholders += `, $${paramIndex++}`;
-          values.push(JSON.stringify(part.providerMetadata));
-        }
+          // Dynamic tool parts (tool calls and results)
+          else if (part.type === "dynamic-tool") {
+            if ("output" in part && part.output !== undefined) {
+              // This is a tool result
+              partValues.toolResultId = String(part.toolCallId);
+              partValues.toolResultName = String(part.toolName);
+              partValues.toolResultResult = part.output;
 
-        await pool.query(
-          `INSERT INTO parts (${columns}) VALUES (${placeholders})`,
-          values,
-        );
+              if ("errorText" in part && part.errorText) {
+                partValues.toolResultIsError = true;
+              }
+            } else {
+              // This is a tool call
+              partValues.toolCallId = String(part.toolCallId);
+              partValues.toolCallName = String(part.toolName);
+              partValues.toolCallArgs = part.input || {};
+            }
+          }
+
+          // Provider metadata (if present)
+          if ("providerMetadata" in part && part.providerMetadata) {
+            partValues.providerMetadata = part.providerMetadata;
+          }
+
+          await tx.insert(parts).values(partValues);
+        }
       }
-    }
 
-    // Update chat's updated_at timestamp
-    await pool.query("UPDATE chats SET updated_at = NOW() WHERE id = $1", [
-      chatId,
-    ]);
+      // Update chat's updated_at timestamp
+      await tx
+        .update(chats)
+        .set({ updatedAt: sql`NOW()` })
+        .where(eq(chats.id, chatId));
+    });
 
-    // Commit transaction
-    await pool.query("COMMIT");
     console.log("saveChat: Messages saved successfully!");
   } catch (error) {
-    await pool.query("ROLLBACK");
     console.error("saveChat: Failed to save messages:", error);
     throw error;
-  } finally {
-    await pool.end();
   }
 }
 
 /**
  * Load chat messages from the database with parts reconstruction
+ * @param db - Database connection instance
  * @param chatId - The UUID of the chat session
- * @param databaseUrl - PostgreSQL connection string
  * @returns Array of UI messages
  */
-export async function loadChat({
-  chatId,
-  databaseUrl,
-}: {
-  chatId: string;
-  databaseUrl: string;
-}): Promise<UIMessage[]> {
-  const pool = new Pool({ connectionString: databaseUrl });
-
+export async function loadChat(
+  db: NodePgDatabase,
+  {
+    chatId,
+  }: {
+    chatId: string;
+  },
+): Promise<UIMessage[]> {
   try {
-    // Fetch messages with their parts in one query
-    const { rows } = await pool.query(
-      `SELECT
-        m.id as message_id,
-        m.role,
-        m.created_at,
-        p.type as part_type,
-        p."order" as part_order,
-        p.text_content,
-        p.reasoning_content,
-        p.image_url,
-        p.image_mime_type,
-        p.file_url,
-        p.file_name,
-        p.file_mime_type,
-        p.tool_call_id,
-        p.tool_call_name,
-        p.tool_call_args,
-        p.tool_result_id,
-        p.tool_result_name,
-        p.tool_result_result,
-        p.tool_result_is_error,
-        p.provider_metadata
-      FROM messages m
-      LEFT JOIN parts p ON p.message_id = m.id
-      WHERE m.chat_id = $1
-      ORDER BY m.created_at ASC, p."order" ASC`,
-      [chatId],
-    );
+    // Fetch messages with their parts using Drizzle
+    const rows = await db
+      .select({
+        messageId: messages.id,
+        role: messages.role,
+        createdAt: messages.createdAt,
+        partType: parts.type,
+        partOrder: parts.order,
+        textContent: parts.textContent,
+        reasoningContent: parts.reasoningContent,
+        imageUrl: parts.imageUrl,
+        imageMimeType: parts.imageMimeType,
+        fileUrl: parts.fileUrl,
+        fileName: parts.fileName,
+        fileMimeType: parts.fileMimeType,
+        toolCallId: parts.toolCallId,
+        toolCallName: parts.toolCallName,
+        toolCallArgs: parts.toolCallArgs,
+        toolResultId: parts.toolResultId,
+        toolResultName: parts.toolResultName,
+        toolResultResult: parts.toolResultResult,
+        toolResultIsError: parts.toolResultIsError,
+        providerMetadata: parts.providerMetadata,
+      })
+      .from(messages)
+      .leftJoin(parts, eq(parts.messageId, messages.id))
+      .where(eq(messages.chatId, chatId))
+      .orderBy(asc(messages.createdAt), asc(parts.order));
 
     // Group parts by message
     const messagesMap = new Map<string, UIMessage>();
 
     for (const row of rows) {
       // Initialize message if not exists
-      if (!messagesMap.has(row.message_id)) {
-        messagesMap.set(row.message_id, {
-          id: row.message_id,
-          role: row.role,
+      if (!messagesMap.has(row.messageId)) {
+        messagesMap.set(row.messageId, {
+          id: row.messageId,
+          role: row.role as "user" | "assistant" | "system",
           parts: [],
         });
       }
 
-      const message = messagesMap.get(row.message_id);
+      const message = messagesMap.get(row.messageId);
       if (!message) continue;
 
       // Skip if this row has no part (shouldn't happen, but be safe)
-      if (!row.part_type) continue;
+      if (!row.partType) continue;
 
       // Reconstruct part based on type
       // For now, we primarily support text parts
       // The schema is extensible for future tool calls, files, etc.
-      if (row.part_type === "text" && row.text_content) {
+      if (row.partType === "text" && row.textContent) {
         message.parts.push({
           type: "text",
-          text: row.text_content,
+          text: row.textContent,
         });
       }
       // Future: Add support for other part types as needed
@@ -234,7 +224,5 @@ export async function loadChat({
   } catch (error) {
     console.error("loadChat: Failed to load messages:", error);
     throw error;
-  } finally {
-    await pool.end();
   }
 }
