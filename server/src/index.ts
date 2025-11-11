@@ -7,9 +7,11 @@ type Bindings = {
   DATABASE_URL: string;
 };
 
-const app = new Hono<{ Bindings: Bindings }>().basePath("/api");
+const app = new Hono<{ Bindings: Bindings }>();
 
 app.use(cors());
 
-app.route("/v1", v1);
+app.get("/", (c) => c.text("AI SDK BHVR Backend is running"));
+app.route("/api/v1", v1);
+
 export default app;

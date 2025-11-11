@@ -7,7 +7,8 @@
   "hyperdrive": [
     {
       "binding": "HYPERDRIVE",
-      "id": "ad4658e8d3b045f9b968efa6f8e1ae59"
+      "id": "ad4658e8d3b045f9b968efa6f8e1ae59",
+      "localConnectionString": "postgresql://postgres:postgres@localhost:5432/ai_sdk_bhvr"
     }
   ]
   // "vars": {
