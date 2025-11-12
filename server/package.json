@@ -6,6 +6,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "wrangler dev",
+    "generate-types": "wrangler types",
+    "type-check": "bun run generate-types && tsc",
     "dev:mast": "mastra dev",
     "build:mast": "mastra build",
     "deploy": "wrangler deploy --minify",

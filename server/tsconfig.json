@@ -9,7 +9,7 @@
     "jsxImportSource": "hono/jsx",
 
     // Types
-    "types": ["bun-types"],
+    "types": ["bun-types", "./worker-configuration.d.ts"],
 
     // Output settings
     "declaration": true,
