@@ -17,8 +17,9 @@ bun dev
 ```
 
 install packages example
+
 ```bash
- bun add -D @types/pg --cwd server   
+ bun add -D @types/pg --cwd server
 ```
 
 ## Run the db
