@@ -12,7 +12,6 @@ export const betterAuthOptions: BetterAuthOptions = {
    * @default "/api/auth"
    */
   // basePath: "/api",
-  trustedOrigins: [process.env.CORS_ORIGIN || ""],
   emailAndPassword: {
     enabled: true,
   },

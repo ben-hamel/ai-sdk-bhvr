@@ -19,5 +19,6 @@ export const auth = (
     database: drizzleAdapter(db, { provider: "pg", schema }),
     baseURL: env.BETTER_AUTH_URL,
     secret: env.BETTER_AUTH_SECRET,
+    trustedOrigins: [env.CORS_ORIGIN || ""],
   });
 };

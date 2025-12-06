@@ -1,4 +1,6 @@
 import beaver from "@/assets/beaver.svg";
+import { Button } from "./ui/button";
+import { Link } from "react-router";
 
 function Home() {
   return (
@@ -17,6 +19,9 @@ function Home() {
       <h1 className="text-5xl font-black">bhvr</h1>
       <h2 className="text-2xl font-bold">Bun + Hono + Vite + React</h2>
       <p>A typesafe fullstack monorepo</p>
+      <Link to="/login">
+        <Button size="lg">Get Started</Button>
+      </Link>
     </div>
   );
 }

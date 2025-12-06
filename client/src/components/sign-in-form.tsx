@@ -28,11 +28,10 @@ export default function SignInForm({
         },
         {
           onSuccess: () => {
-            navigate("/dashboard");
-            console.log("Sign in successful");
+            navigate("/app");
           },
-          onError: (error) => {
-            console.error(error.error.message || error.error.statusText);
+          onError: (ctx) => {
+            console.error(ctx.error.message || ctx.error.statusText);
           },
         }
       );

@@ -5,7 +5,21 @@ import { auth } from "./lib/better-auth/index";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
-app.use(cors());
+// app.use(cors());
+app.use(
+  "/api/auth/*",
+  cors({
+    origin: (_origin, c) => {
+      const allowedOrigin = c.env.CORS_ORIGIN || "";
+      return allowedOrigin;
+    },
+    allowHeaders: ["Content-Type", "Authorization"],
+    allowMethods: ["POST", "GET", "OPTIONS"],
+    exposeHeaders: ["Content-Length"],
+    maxAge: 600,
+    credentials: true,
+  })
+);
 
 app.on(["GET", "POST"], "/api/auth/*", (c) => {
   return auth(c.env).handler(c.req.raw);
