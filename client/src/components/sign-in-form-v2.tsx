@@ -27,8 +27,6 @@ export default function SignInFormV2({
       {
         email,
         password,
-        callbackURL: "/app",
-        rememberMe: true,
       },
       {
         onRequest: () => {
