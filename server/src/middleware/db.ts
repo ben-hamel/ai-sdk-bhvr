@@ -1,5 +1,5 @@
 import type { Context, Next } from "hono";
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import type { NeonHttpDatabase } from "drizzle-orm/neon-http";
 import { createDb } from "../db";
 
 type Bindings = {
@@ -7,13 +7,9 @@ type Bindings = {
 };
 
 type Variables = {
-  db: NodePgDatabase;
+  db: NeonHttpDatabase;
 };
 
-/**
- * Middleware that creates a database instance and attaches it to the context.
- * Each request gets its own db instance, following Cloudflare Workers best practices.
- */
 export async function dbMiddleware(
   c: Context<{ Bindings: Bindings; Variables: Variables }>,
   next: Next,

@@ -6,11 +6,11 @@ import {
 } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { desc } from "drizzle-orm";
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import type { NeonHttpDatabase } from "drizzle-orm/neon-http";
 import { chats } from "../../db/schema/chats";
 import { loadChat, saveChat } from "./chats.repository";
 
-export async function getAllChats(db: NodePgDatabase) {
+export async function getAllChats(db: NeonHttpDatabase) {
   return await db
     .select({
       id: chats.id,
@@ -21,18 +21,18 @@ export async function getAllChats(db: NodePgDatabase) {
     .orderBy(desc(chats.updatedAt));
 }
 
-export async function createChat(db: NodePgDatabase) {
+export async function createChat(db: NeonHttpDatabase) {
   const [chat] = await db.insert(chats).values({}).returning({ id: chats.id });
   return chat;
 }
 
-export async function getChatMessages(db: NodePgDatabase, chatId: string) {
+export async function getChatMessages(db: NeonHttpDatabase, chatId: string) {
   const messages = await loadChat(db, { chatId });
   return messages;
 }
 
 export async function streamChatMessages(
-  db: NodePgDatabase,
+  db: NeonHttpDatabase,
   chatId: string,
   messages: UIMessage[],
   googleApiKey: string,
