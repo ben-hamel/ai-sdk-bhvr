@@ -8,15 +8,11 @@ export const AppPage = () => {
   const { data: session, isPending } = authClient.useSession();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!session && !isPending) {
-      navigate("/login");
-    }
-  }, [session, isPending, navigate]);
-
-  if (isPending) {
-    return <Loader />;
-  }
+  // useEffect(() => {
+  //   if (!session && !isPending) {
+  //     navigate("/login");
+  //   }
+  // }, [session, isPending, navigate]);
 
   const handleSignOut = async () => {
     await authClient.signOut({
@@ -27,6 +23,10 @@ export const AppPage = () => {
       },
     });
   };
+
+  if (isPending) {
+    return <Loader />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col">

@@ -27,6 +27,8 @@ export default function SignInFormV2({
       {
         email,
         password,
+        // callbackURL: "/app", // dont use this, it cause full page reload
+        rememberMe: false,
       },
       {
         onRequest: () => {
