@@ -21,5 +21,11 @@ export const auth = (env: Env): ReturnType<typeof betterAuth> => {
         clientSecret: env.GOOGLE_CLIENT_SECRET,
       },
     },
+    advanced: {
+      defaultCookieAttributes: {
+        sameSite: "none",
+        secure: true,
+      },
+    },
   });
 };
