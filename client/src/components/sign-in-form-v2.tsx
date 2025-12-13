@@ -6,11 +6,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
-export default function SignInFormV2({
-  onSwitchToSignUp,
-}: {
-  onSwitchToSignUp: () => void;
-}) {
+export default function SignInFormV2() {
   const navigate = useNavigate();
   const { isPending } = authClient.useSession();
   const [email, setEmail] = useState("");
@@ -102,7 +98,7 @@ export default function SignInFormV2({
       <div className="mt-4 text-center">
         <Button
           variant="link"
-          onClick={onSwitchToSignUp}
+          onClick={() => navigate("/signup")}
           className="text-indigo-600 hover:text-indigo-800"
           disabled={isLoading}
         >

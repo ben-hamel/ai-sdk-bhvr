@@ -1,32 +1,27 @@
 import { authClient } from "@/lib/auth-client";
-import { Outlet, useNavigate } from "react-router";
-import { useEffect } from "react";
-import Loader from "@/components/loader";
+import { Outlet, redirect, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 
-export const AppPage = () => {
-  const { data: session, isPending } = authClient.useSession();
-  const navigate = useNavigate();
+export async function appLoader() {
+  const { data: session } = await authClient.getSession();
+  if (!session) {
+    return redirect("/login");
+  }
+  return { session };
+}
 
-  // useEffect(() => {
-  //   if (!session && !isPending) {
-  //     navigate("/login");
-  //   }
-  // }, [session, isPending, navigate]);
+export const AppPage = () => {
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          navigate("/");
+          navigate("/login");
         },
       },
     });
   };
-
-  if (isPending) {
-    return <Loader />;
-  }
 
   return (
     <div className="min-h-screen flex flex-col">
