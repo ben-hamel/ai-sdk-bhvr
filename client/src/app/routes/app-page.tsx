@@ -1,28 +1,23 @@
 import { authClient } from "@/lib/auth-client";
-import { Outlet, useNavigate } from "react-router";
-import { useEffect } from "react";
-import Loader from "@/components/loader";
+import { Outlet, redirect, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 
-export const AppPage = () => {
-  const { data: session, isPending } = authClient.useSession();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!session && !isPending) {
-      navigate("/login");
-    }
-  }, [session, isPending, navigate]);
-
-  if (isPending) {
-    return <Loader />;
+export async function appLoader() {
+  const { data: session } = await authClient.getSession();
+  if (!session) {
+    return redirect("/login");
   }
+  return { session };
+}
+
+export const AppPage = () => {
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          navigate("/");
+          navigate("/login");
         },
       },
     });

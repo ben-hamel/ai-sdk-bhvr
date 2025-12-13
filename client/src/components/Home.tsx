@@ -16,9 +16,9 @@ function Home() {
           alt="beaver logo"
         />
       </a>
-      <h1 className="text-5xl font-black">bhvr</h1>
-      <h2 className="text-2xl font-bold">Bun + Hono + Vite + React</h2>
-      <p>A typesafe fullstack monorepo</p>
+      <h1 className="text-5xl font-black">BenSTACK</h1>
+      {/* <h2 className="text-2xl font-bold">Bun + Hono + Vite + React</h2>
+      <p>A typesafe fullstack monorepo</p> */}
       <Link to="/login">
         <Button size="lg">Get Started</Button>
       </Link>
