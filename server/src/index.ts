@@ -3,7 +3,7 @@ import { cors } from "hono/cors";
 import { v1 } from "./routes";
 import { auth } from "./lib/better-auth/index";
 
-const app = new Hono<{ Bindings: CloudflareBindings }>();
+const app = new Hono<{ Bindings: Env }>();
 
 // app.use(cors());
 app.use(
