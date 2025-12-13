@@ -10,6 +10,7 @@
   },
   "vars": {
     "CORS_ORIGIN": "https://ai-sdk-bhvr.pages.dev",
+    "BETTER_AUTH_URL": "https://ai-sdk-bhvr-server.benehamel.workers.dev",
   },
   // "hyperdrive": [
   // 	{
