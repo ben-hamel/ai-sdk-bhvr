@@ -41,7 +41,11 @@ export default function SignInForm() {
     setSocialError(null);
     setIsGoogleLoading(true);
     await authClient.signIn.social(
-      { provider: "google", callbackURL: `${window.location.origin}/app` },
+      {
+        provider: "google",
+        callbackURL: `${window.location.origin}/app`,
+        errorCallbackURL: `${window.location.origin}/login`,
+      },
       {
         onError: (ctx) => {
           setSocialError(ctx.error.message || "Failed to sign in with Google");
