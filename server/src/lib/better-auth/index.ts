@@ -26,6 +26,7 @@ export const auth = (env: Env): ReturnType<typeof betterAuth> => {
       defaultCookieAttributes: {
         sameSite: "none",
         secure: true,
+        path: "/",
       },
     },
   });
