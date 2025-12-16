@@ -23,10 +23,18 @@ export const auth = (env: Env): ReturnType<typeof betterAuth> => {
       },
     },
     advanced: {
-      defaultCookieAttributes: {
-        sameSite: "none",
-        secure: true,
-        path: "/",
+      // defaultCookieAttributes: {
+      //   sameSite: "none",
+      //   secure: true,
+      //   path: "/",
+      // },
+      cookies: {
+        state: {
+          attributes: {
+            sameSite: "none",
+            secure: true,
+          },
+        },
       },
     },
   });
