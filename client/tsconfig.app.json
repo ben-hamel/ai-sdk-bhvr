@@ -18,14 +18,10 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
-       "paths": {
-         "@/*": [
-           "./src/*"
-         ],
-         "@shared/*": [
-          "../shared/src/*"
-        ]
-       }
+    "paths": {
+      "@/*": ["./src/*"],
+      "@shared/*": ["../shared/src/*"]
+    }
   },
   "include": ["src"]
 }

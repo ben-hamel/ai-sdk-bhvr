@@ -18,7 +18,7 @@ app.use(
     exposeHeaders: ["Content-Length"],
     maxAge: 600,
     credentials: true,
-  })
+  }),
 );
 
 app.on(["GET", "POST"], "/api/auth/*", (c) => {

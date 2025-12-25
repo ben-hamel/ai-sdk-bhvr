@@ -26,8 +26,8 @@ export const messages = pgTable(
       createdAtIdx: index("idx_messages_created_at").on(table.createdAt),
       chatIdCreatedAtIdx: index("idx_messages_chat_id_created_at").on(
         table.chatId,
-        table.createdAt
+        table.createdAt,
       ),
     };
-  }
+  },
 );

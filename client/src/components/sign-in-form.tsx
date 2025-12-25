@@ -51,7 +51,7 @@ export default function SignInForm() {
           setSocialError(ctx.error.message || "Failed to sign in with Google");
           setIsGoogleLoading(false);
         },
-      }
+      },
     );
   };
 
@@ -73,7 +73,7 @@ export default function SignInForm() {
           onError: (ctx) => {
             console.error(ctx.error.message || ctx.error.statusText);
           },
-        }
+        },
       );
     },
     validators: {

@@ -58,33 +58,33 @@ export const parts = pgTable(
       messageIdIdx: index("idx_parts_message_id").on(table.messageId),
       messageIdOrderIdx: index("idx_parts_message_id_order").on(
         table.messageId,
-        table.order
+        table.order,
       ),
       // Constraints to ensure complete part definitions
       validTextPart: check(
         "valid_text_part",
-        sql`${table.type} != 'text' OR ${table.textContent} IS NOT NULL`
+        sql`${table.type} != 'text' OR ${table.textContent} IS NOT NULL`,
       ),
       validReasoningPart: check(
         "valid_reasoning_part",
-        sql`${table.type} != 'reasoning' OR ${table.reasoningContent} IS NOT NULL`
+        sql`${table.type} != 'reasoning' OR ${table.reasoningContent} IS NOT NULL`,
       ),
       validImagePart: check(
         "valid_image_part",
-        sql`${table.type} != 'image' OR ${table.imageUrl} IS NOT NULL`
+        sql`${table.type} != 'image' OR ${table.imageUrl} IS NOT NULL`,
       ),
       validFilePart: check(
         "valid_file_part",
-        sql`${table.type} != 'file' OR (${table.fileUrl} IS NOT NULL AND ${table.fileName} IS NOT NULL)`
+        sql`${table.type} != 'file' OR (${table.fileUrl} IS NOT NULL AND ${table.fileName} IS NOT NULL)`,
       ),
       validToolCallPart: check(
         "valid_tool_call_part",
-        sql`${table.type} != 'tool-call' OR (${table.toolCallId} IS NOT NULL AND ${table.toolCallName} IS NOT NULL AND ${table.toolCallArgs} IS NOT NULL)`
+        sql`${table.type} != 'tool-call' OR (${table.toolCallId} IS NOT NULL AND ${table.toolCallName} IS NOT NULL AND ${table.toolCallArgs} IS NOT NULL)`,
       ),
       validToolResultPart: check(
         "valid_tool_result_part",
-        sql`${table.type} != 'tool-result' OR (${table.toolResultId} IS NOT NULL AND ${table.toolResultResult} IS NOT NULL)`
+        sql`${table.type} != 'tool-result' OR (${table.toolResultId} IS NOT NULL AND ${table.toolResultResult} IS NOT NULL)`,
       ),
     };
-  }
+  },
 );

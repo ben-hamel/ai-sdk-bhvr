@@ -1,10 +1,10 @@
-import { type UIMessage } from 'ai';
-import { z } from 'zod';
+import { type UIMessage } from "ai";
+import { z } from "zod";
 
 export type ApiResponse = {
   message: string;
   success: true;
-}
+};
 
 export const messageMetadataSchema = z.object({
   inputTokens: z.number().optional(),

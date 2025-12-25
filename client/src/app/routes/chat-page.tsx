@@ -35,11 +35,13 @@ export const ChatPage = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { chatId } = useParams<{ chatId: string }>();
 
-  const { messages, status, sendMessage, setMessages } = useChat<CustomMessage>({
-    transport: new DefaultChatTransport({
-      api: `${SERVER_URL}/api/v1/chats/${chatId}/messages`,
-    }),
-  });
+  const { messages, status, sendMessage, setMessages } = useChat<CustomMessage>(
+    {
+      transport: new DefaultChatTransport({
+        api: `${SERVER_URL}/api/v1/chats/${chatId}/messages`,
+      }),
+    },
+  );
 
   // Load chat history when chatId is present using TanStack Query
   const { data: chatHistory } = useQuery({
@@ -67,14 +69,14 @@ export const ChatPage = () => {
       (acc, message) => {
         return {
           inputTokens: acc.inputTokens + (message.metadata?.inputTokens || 0),
-          outputTokens: acc.outputTokens + (message.metadata?.outputTokens || 0),
+          outputTokens:
+            acc.outputTokens + (message.metadata?.outputTokens || 0),
           totalTokens: acc.totalTokens + (message.metadata?.totalTokens || 0),
         };
       },
-      { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
+      { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
     );
   }, [messages]);
-
 
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
@@ -121,7 +123,6 @@ export const ChatPage = () => {
                   })}
                 </MessageContent>
               </Message>
-
             ))}
           </ConversationContent>
           <ConversationScrollButton />
