@@ -9,8 +9,8 @@
     "head_sampling_rate": 1
   },
   "vars": {
-    "CORS_ORIGIN": "https://aisdk.eastcoastdev.online",
-    "BETTER_AUTH_URL": "https://ai-sdk-bhvr-server.benehamel.workers.dev"
+    "CORS_ORIGIN": "https:// aisdk.app.eastcoastdev.online",
+    "BETTER_AUTH_URL": "https://aisdk.api.eastcoastdev.online"
   }
   // "hyperdrive": [
   // 	{
