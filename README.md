@@ -29,3 +29,5 @@ To run the PostgreSQL database using Docker, use the following command:
 ```bash
 bun db:start
 ```
+
+you'll need to set .env in client and Server. There are .env.example files in client and server
