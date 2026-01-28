@@ -4,6 +4,7 @@ import { ChatPage } from "@/app/routes/chat-page";
 import { LoginPage } from "@/app/routes/login-page";
 import { SignUpPage } from "@/app/routes/signup-page";
 import { AppPage, appLoader } from "@/app/routes/app-page";
+import { NotFoundPage } from "@/app/routes/not-found";
 
 export const router = createBrowserRouter([
   {
@@ -28,5 +29,10 @@ export const router = createBrowserRouter([
         Component: ChatPage,
       },
     ],
+  },
+  {
+  {
+    path: "*",
+    Component: NotFoundPage,
   },
 ]);
