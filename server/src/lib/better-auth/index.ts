@@ -5,7 +5,7 @@ import { betterAuth } from "better-auth";
 import { betterAuthOptions } from "./options";
 import * as schema from "../../db/schema/auth";
 
-export const auth = (env: Env): ReturnType<typeof betterAuth> => {
+export const auth = (env: Env) => {
   const sql = neon(env.DATABASE_URL);
   const db = drizzle(sql);
 

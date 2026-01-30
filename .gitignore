@@ -41,3 +41,6 @@ pnpm-debug.log*
 # Bun
 bun.lockb
 .turbo
+
+#Neon
+.neon
