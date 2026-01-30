@@ -6,7 +6,7 @@ import { admin } from "better-auth/plugins";
  *
  * Docs: https://www.better-auth.com/docs/reference/options
  */
-export const betterAuthOptions: BetterAuthOptions = {
+export const betterAuthOptions = {
   appName: "ai-sdk-bhvr",
   /**
    * Base path for Better Auth.
@@ -17,4 +17,4 @@ export const betterAuthOptions: BetterAuthOptions = {
     enabled: true,
   },
   plugins: [admin()],
-};
+} satisfies BetterAuthOptions;
