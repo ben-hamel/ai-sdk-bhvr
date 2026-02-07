@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { env } from "cloudflare:workers";
+// import { env } from "cloudflare:workers";
 import { defineConfig } from "drizzle-kit";
 
 export default defineConfig({
@@ -7,7 +7,7 @@ export default defineConfig({
   schema: "./src/db/schema/*",
   dialect: "postgresql",
   dbCredentials: {
-    url: env.DATABASE_URL || "",
+    url: process.env.DATABASE_URL || "",
   },
   tablesFilter: ["!mastra_*", "!memory_*"],
 });
