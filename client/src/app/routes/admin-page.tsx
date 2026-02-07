@@ -229,7 +229,7 @@ export const AdminPage = () => {
 
   const handleBanToggle = async () => {
     if (!selectedUser) return;
-    
+
     if (session?.user?.id === selectedUser.id) {
       setActionError("You cannot ban yourself.");
       return;
@@ -706,15 +706,15 @@ export const AdminPage = () => {
                       </div>
                     ) : null}
                     {!sessionsError &&
-                    !sessionsLoading &&
-                    sessions.length === 0 ? (
+                      !sessionsLoading &&
+                      sessions.length === 0 ? (
                       <div className="text-sm text-muted-foreground">
                         No active sessions.
                       </div>
                     ) : null}
                     {!sessionsError &&
-                    !sessionsLoading &&
-                    sessions.length > 0 ? (
+                      !sessionsLoading &&
+                      sessions.length > 0 ? (
                       <div className="space-y-3">
                         {sessions.map((session) => (
                           <div
