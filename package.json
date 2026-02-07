@@ -1,7 +1,7 @@
 {
   "name": "ai-sdk-bhvr",
   "description": "A monorepo template built with Bun, Hono, Vite, and React",
-  "packageManager": "bun@1.2.4",
+  "packageManager": "bun@1.3.6",
   "workspaces": [
     "./server",
     "./client",
