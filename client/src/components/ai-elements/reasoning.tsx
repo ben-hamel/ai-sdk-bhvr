@@ -1,5 +1,7 @@
 "use client";
 
+import type { ComponentProps, ReactNode } from "react";
+
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import {
   Collapsible,
@@ -7,21 +9,35 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { cjk } from "@streamdown/cjk";
+import { code } from "@streamdown/code";
+import { math } from "@streamdown/math";
+import { mermaid } from "@streamdown/mermaid";
 import { BrainIcon, ChevronDownIcon } from "lucide-react";
-import type { ComponentProps } from "react";
-import { createContext, memo, useContext, useEffect, useState } from "react";
-import { Response } from "./response";
+import {
+  createContext,
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { Streamdown } from "streamdown";
 
-type ReasoningContextValue = {
+import { Shimmer } from "./shimmer";
+
+interface ReasoningContextValue {
   isStreaming: boolean;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
-  duration: number;
-};
+  duration: number | undefined;
+}
 
 const ReasoningContext = createContext<ReasoningContextValue | null>(null);
 
-const useReasoning = () => {
+export const useReasoning = () => {
   const context = useContext(ReasoningContext);
   if (!context) {
     throw new Error("Reasoning components must be used within Reasoning");
@@ -45,41 +61,58 @@ export const Reasoning = memo(
     className,
     isStreaming = false,
     open,
-    defaultOpen = true,
+    defaultOpen,
     onOpenChange,
     duration: durationProp,
     children,
     ...props
   }: ReasoningProps) => {
-    const [isOpen, setIsOpen] = useControllableState({
-      prop: open,
-      defaultProp: defaultOpen,
+    const resolvedDefaultOpen = defaultOpen ?? isStreaming;
+    // Track if defaultOpen was explicitly set to false (to prevent auto-open)
+    const isExplicitlyClosed = defaultOpen === false;
+
+    const [isOpen, setIsOpen] = useControllableState<boolean>({
+      defaultProp: resolvedDefaultOpen,
       onChange: onOpenChange,
+      prop: open,
     });
-    const [duration, setDuration] = useControllableState({
+    const [duration, setDuration] = useControllableState<number | undefined>({
+      defaultProp: undefined,
       prop: durationProp,
-      defaultProp: 0,
     });
 
+    const hasEverStreamedRef = useRef(isStreaming);
     const [hasAutoClosed, setHasAutoClosed] = useState(false);
-    const [startTime, setStartTime] = useState<number | null>(null);
+    const startTimeRef = useRef<number | null>(null);
 
-    // Track duration when streaming starts and ends
+    // Track when streaming starts and compute duration
     useEffect(() => {
       if (isStreaming) {
-        if (startTime === null) {
-          setStartTime(Date.now());
+        hasEverStreamedRef.current = true;
+        if (startTimeRef.current === null) {
+          startTimeRef.current = Date.now();
         }
-      } else if (startTime !== null) {
-        setDuration(Math.ceil((Date.now() - startTime) / MS_IN_S));
-        setStartTime(null);
+      } else if (startTimeRef.current !== null) {
+        setDuration(Math.ceil((Date.now() - startTimeRef.current) / MS_IN_S));
+        startTimeRef.current = null;
       }
-    }, [isStreaming, startTime, setDuration]);
+    }, [isStreaming, setDuration]);
 
-    // Auto-open when streaming starts, auto-close when streaming ends (once only)
+    // Auto-open when streaming starts (unless explicitly closed)
     useEffect(() => {
-      if (defaultOpen && !isStreaming && isOpen && !hasAutoClosed) {
-        // Add a small delay before closing to allow user to see the content
+      if (isStreaming && !isOpen && !isExplicitlyClosed) {
+        setIsOpen(true);
+      }
+    }, [isStreaming, isOpen, setIsOpen, isExplicitlyClosed]);
+
+    // Auto-close when streaming ends (once only, and only if it ever streamed)
+    useEffect(() => {
+      if (
+        hasEverStreamedRef.current &&
+        !isStreaming &&
+        isOpen &&
+        !hasAutoClosed
+      ) {
         const timer = setTimeout(() => {
           setIsOpen(false);
           setHasAutoClosed(true);
@@ -87,16 +120,22 @@ export const Reasoning = memo(
 
         return () => clearTimeout(timer);
       }
-    }, [isStreaming, isOpen, defaultOpen, setIsOpen, hasAutoClosed]);
+    }, [isStreaming, isOpen, setIsOpen, hasAutoClosed]);
 
-    const handleOpenChange = (newOpen: boolean) => {
-      setIsOpen(newOpen);
-    };
+    const handleOpenChange = useCallback(
+      (newOpen: boolean) => {
+        setIsOpen(newOpen);
+      },
+      [setIsOpen]
+    );
+
+    const contextValue = useMemo(
+      () => ({ duration, isOpen, isStreaming, setIsOpen }),
+      [duration, isOpen, isStreaming, setIsOpen]
+    );
 
     return (
-      <ReasoningContext.Provider
-        value={{ isStreaming, isOpen, setIsOpen, duration }}
-      >
+      <ReasoningContext.Provider value={contextValue}>
         <Collapsible
           className={cn("not-prose mb-4", className)}
           onOpenChange={handleOpenChange}
@@ -107,14 +146,18 @@ export const Reasoning = memo(
         </Collapsible>
       </ReasoningContext.Provider>
     );
-  },
+  }
 );
 
-export type ReasoningTriggerProps = ComponentProps<typeof CollapsibleTrigger>;
+export type ReasoningTriggerProps = ComponentProps<
+  typeof CollapsibleTrigger
+> & {
+  getThinkingMessage?: (isStreaming: boolean, duration?: number) => ReactNode;
+};
 
-const getThinkingMessage = (isStreaming: boolean, duration?: number) => {
+const defaultGetThinkingMessage = (isStreaming: boolean, duration?: number) => {
   if (isStreaming || duration === 0) {
-    return <p>Thinking...</p>;
+    return <Shimmer duration={1}>Thinking...</Shimmer>;
   }
   if (duration === undefined) {
     return <p>Thought for a few seconds</p>;
@@ -123,14 +166,19 @@ const getThinkingMessage = (isStreaming: boolean, duration?: number) => {
 };
 
 export const ReasoningTrigger = memo(
-  ({ className, children, ...props }: ReasoningTriggerProps) => {
+  ({
+    className,
+    children,
+    getThinkingMessage = defaultGetThinkingMessage,
+    ...props
+  }: ReasoningTriggerProps) => {
     const { isStreaming, isOpen, duration } = useReasoning();
 
     return (
       <CollapsibleTrigger
         className={cn(
           "flex w-full items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground",
-          className,
+          className
         )}
         {...props}
       >
@@ -141,14 +189,14 @@ export const ReasoningTrigger = memo(
             <ChevronDownIcon
               className={cn(
                 "size-4 transition-transform",
-                isOpen ? "rotate-180" : "rotate-0",
+                isOpen ? "rotate-180" : "rotate-0"
               )}
             />
           </>
         )}
       </CollapsibleTrigger>
     );
-  },
+  }
 );
 
 export type ReasoningContentProps = ComponentProps<
@@ -157,19 +205,23 @@ export type ReasoningContentProps = ComponentProps<
   children: string;
 };
 
+const streamdownPlugins = { cjk, code, math, mermaid };
+
 export const ReasoningContent = memo(
   ({ className, children, ...props }: ReasoningContentProps) => (
     <CollapsibleContent
       className={cn(
         "mt-4 text-sm",
         "data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 text-muted-foreground outline-none data-[state=closed]:animate-out data-[state=open]:animate-in",
-        className,
+        className
       )}
       {...props}
     >
-      <Response className="grid gap-2">{children}</Response>
+      <Streamdown plugins={streamdownPlugins} {...props}>
+        {children}
+      </Streamdown>
     </CollapsibleContent>
-  ),
+  )
 );
 
 Reasoning.displayName = "Reasoning";

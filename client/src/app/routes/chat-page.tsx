@@ -12,14 +12,13 @@ import {
 import { Message, MessageContent } from "@/components/ai-elements/message";
 import {
   PromptInput,
-  PromptInputAttachment,
-  PromptInputAttachments,
   PromptInputBody,
+  PromptInputFooter,
   type PromptInputMessage,
   PromptInputSubmit,
   PromptInputTextarea,
-  PromptInputToolbar,
   PromptInputTools,
+  usePromptInputAttachments,
 } from "@/components/ai-elements/prompt-input";
 import { Response } from "@/components/ai-elements/response";
 import { SERVER_URL } from "@/constants";
@@ -29,6 +28,45 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router";
 import type { CustomMessage } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
+import { authClient } from "@/lib/auth-client";
+import { isAdminRole } from "@/lib/auth-roles";
+
+export async function chatLoader() {
+  const { data: session } = await authClient.getSession();
+  if (!session || !isAdminRole(session.user?.role)) {
+    throw new globalThis.Response("Not Found", { status: 404 });
+  }
+
+  return { session };
+}
+
+const ChatAttachments = () => {
+  const { files, remove } = usePromptInputAttachments();
+
+  if (files.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2 px-2 pt-2">
+      {files.map((attachment) => (
+        <div
+          key={attachment.id}
+          className="inline-flex max-w-56 items-center gap-2 rounded-md border bg-muted px-2 py-1 text-xs"
+        >
+          <span className="truncate">{attachment.filename}</span>
+          <button
+            type="button"
+            className="text-muted-foreground hover:text-foreground"
+            onClick={() => remove(attachment.id)}
+          >
+            x
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export const ChatPage = () => {
   const [text, setText] = useState<string>("");
@@ -135,16 +173,14 @@ export const ChatPage = () => {
           multiple
         >
           <PromptInputBody>
-            <PromptInputAttachments>
-              {(attachment) => <PromptInputAttachment data={attachment} />}
-            </PromptInputAttachments>
+            <ChatAttachments />
             <PromptInputTextarea
               onChange={(e) => setText(e.target.value)}
               ref={textareaRef}
               value={text}
             />
           </PromptInputBody>
-          <PromptInputToolbar>
+          <PromptInputFooter>
             <PromptInputTools>
               <Context
                 maxTokens={1_114_112}
@@ -173,7 +209,7 @@ export const ChatPage = () => {
               </Context>
             </PromptInputTools>
             <PromptInputSubmit disabled={!text && !status} status={status} />
-          </PromptInputToolbar>
+          </PromptInputFooter>
         </PromptInput>
       </div>
     </div>

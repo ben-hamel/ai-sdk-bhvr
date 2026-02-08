@@ -1,3 +1,5 @@
+import type { ComponentProps } from "react";
+
 import {
   Card,
   CardAction,
@@ -9,7 +11,6 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Handle, Position } from "@xyflow/react";
-import type { ComponentProps } from "react";
 
 export type NodeProps = ComponentProps<typeof Card> & {
   handles: {
@@ -22,7 +23,7 @@ export const Node = ({ handles, className, ...props }: NodeProps) => (
   <Card
     className={cn(
       "node-container relative size-full h-auto w-sm gap-0 rounded-md p-0",
-      className,
+      className
     )}
     {...props}
   >

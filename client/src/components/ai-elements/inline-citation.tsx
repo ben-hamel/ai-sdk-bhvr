@@ -1,9 +1,11 @@
 "use client";
 
+import type { CarouselApi } from "@/components/ui/carousel";
+import type { ComponentProps } from "react";
+
 import { Badge } from "@/components/ui/badge";
 import {
   Carousel,
-  type CarouselApi,
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
@@ -15,7 +17,6 @@ import {
 import { cn } from "@/lib/utils";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import {
-  type ComponentProps,
   createContext,
   useCallback,
   useContext,
@@ -68,7 +69,7 @@ export const InlineCitationCardTrigger = ({
       variant="secondary"
       {...props}
     >
-      {sources.length ? (
+      {sources[0] ? (
         <>
           {new URL(sources[0]).hostname}{" "}
           {sources.length > 1 && `+${sources.length - 1}`}
@@ -117,7 +118,7 @@ export const InlineCitationCarousel = ({
 export type InlineCitationCarouselContentProps = ComponentProps<"div">;
 
 export const InlineCitationCarouselContent = (
-  props: InlineCitationCarouselContentProps,
+  props: InlineCitationCarouselContentProps
 ) => <CarouselContent {...props} />;
 
 export type InlineCitationCarouselItemProps = ComponentProps<"div">;
@@ -141,7 +142,7 @@ export const InlineCitationCarouselHeader = ({
   <div
     className={cn(
       "flex items-center justify-between gap-2 rounded-t-md bg-secondary p-2",
-      className,
+      className
     )}
     {...props}
   />
@@ -166,16 +167,22 @@ export const InlineCitationCarouselIndex = ({
     setCount(api.scrollSnapList().length);
     setCurrent(api.selectedScrollSnap() + 1);
 
-    api.on("select", () => {
+    const handleSelect = () => {
       setCurrent(api.selectedScrollSnap() + 1);
-    });
+    };
+
+    api.on("select", handleSelect);
+
+    return () => {
+      api.off("select", handleSelect);
+    };
   }, [api]);
 
   return (
     <div
       className={cn(
         "flex flex-1 items-center justify-end px-3 py-1 text-muted-foreground text-xs",
-        className,
+        className
       )}
       {...props}
     >
@@ -278,7 +285,7 @@ export const InlineCitationQuote = ({
   <blockquote
     className={cn(
       "border-muted border-l-2 pl-3 text-muted-foreground text-sm italic",
-      className,
+      className
     )}
     {...props}
   >

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { isAdminRole } from "@/lib/auth-roles";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -48,15 +49,6 @@ type AdminSession = {
 };
 
 type AuthRole = "user" | "admin";
-
-const isAdminRole = (role?: string | string[] | null) => {
-  if (!role) return false;
-  if (Array.isArray(role)) return role.includes("admin");
-  return role
-    .split(",")
-    .map((value) => value.trim())
-    .includes("admin");
-};
 
 export async function adminLoader() {
   const { data: session } = await authClient.getSession();
