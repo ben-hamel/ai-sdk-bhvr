@@ -22,6 +22,12 @@ install packages example
  bun add -D @types/pg --cwd server
 ```
 
+update packages interactively (recursive workspace)
+
+```bash
+bun update -i -r
+```
+
 ## Run the db
 
 To run the PostgreSQL database using Docker, use the following command:

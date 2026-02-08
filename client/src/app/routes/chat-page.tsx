@@ -150,7 +150,16 @@ export const ChatPage = () => {
                 maxTokens={1_114_112}
                 usage={{
                   inputTokens: tokenUsage.inputTokens,
+                  inputTokenDetails: {
+                    noCacheTokens: tokenUsage.inputTokens,
+                    cacheReadTokens: 0,
+                    cacheWriteTokens: 0,
+                  },
                   outputTokens: tokenUsage.outputTokens,
+                  outputTokenDetails: {
+                    textTokens: tokenUsage.outputTokens,
+                    reasoningTokens: 0,
+                  },
                   totalTokens: tokenUsage.totalTokens,
                   cachedInputTokens: 0,
                   reasoningTokens: 0,

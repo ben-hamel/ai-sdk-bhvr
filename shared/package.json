@@ -11,7 +11,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "ai": "^5.0.68",
-    "zod": "^4.1.12"
+    "ai": "catalog:",
+    "zod": "catalog:"
   }
 }

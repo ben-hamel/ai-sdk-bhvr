@@ -7,6 +7,10 @@
     "./client",
     "./shared"
   ],
+  "catalog": {
+    "ai": "^6.0.77",
+    "zod": "^4.3.6"
+  },
   "scripts": {
     "dev": "turbo dev",
     "dev:client": "turbo dev --filter=client",
@@ -26,7 +30,7 @@
     "format": "biome format . --write"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.5",
+    "@biomejs/biome": "^2.3.14",
     "bun-types": "latest",
     "turbo": "^2.8.3"
   },
