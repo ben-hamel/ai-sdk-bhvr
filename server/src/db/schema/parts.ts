@@ -4,16 +4,15 @@ import {
   index,
   integer,
   jsonb,
-  pgTable,
   text,
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
-import { messages } from "./chats";
+import { aisdk, messages } from "./chats";
 
 // Parts table - stores individual message parts with type preservation
-export const parts = pgTable(
+export const parts = aisdk.table(
   "parts",
   {
     id: uuid("id").primaryKey().defaultRandom(),
