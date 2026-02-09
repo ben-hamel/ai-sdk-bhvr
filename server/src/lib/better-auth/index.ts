@@ -1,17 +1,14 @@
-// import { neon } from "@neondatabase/serverless";
-// import { drizzle } from "drizzle-orm/neon-http";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { betterAuth } from "better-auth";
 import { betterAuthOptions } from "./options";
 import * as schema from "../../db/schema/auth";
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { env } from "cloudflare:workers";
-// import { db } from "../../db/index"
 
 
 export const auth = () => {
 
-  const db = drizzle(env.DATABASE_URL); // This will work, it seems liek if db is called outside here then i get the refresh issue
+  const db = drizzle(env.DATABASE_URL); // This will work, it seems liek if db is called outside here then i get the refresh CORS issue
 
   return betterAuth({
     ...betterAuthOptions,
