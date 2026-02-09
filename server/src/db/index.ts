@@ -1,7 +1,21 @@
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
+import { Client, Pool } from "pg";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { env } from "cloudflare:workers";
 
-export function createDb(databaseUrl: string) {
-  const sql = neon(databaseUrl);
-  return drizzle(sql);
+export type AppDb = NodePgDatabase<Record<string, never>>;
+
+export async function createDb(databaseUrl: string): Promise<AppDb> {
+  const client = new Client({ connectionString: databaseUrl });
+  await client.connect();
+  return drizzle(client);
 }
+
+export const db = drizzle(env.DATABASE_URL);
+
+// const pool = new Pool({
+//   connectionString: process.env.DATABASE_URL,
+// });
+
+// export const db = drizzle({ client: pool });
+

@@ -1,6 +1,6 @@
 import type { UIMessage } from "ai";
 import { asc, eq, sql } from "drizzle-orm";
-import type { NeonHttpDatabase } from "drizzle-orm/neon-http";
+import type { AppDb } from "../../db";
 import { chats, messages } from "../../db/schema/chats";
 import { parts } from "../../db/schema/parts";
 
@@ -11,7 +11,7 @@ import { parts } from "../../db/schema/parts";
  * @param messages - Array of UI messages to save
  */
 export async function saveChat(
-  db: NeonHttpDatabase,
+  db: AppDb,
   {
     chatId,
     messages: uiMessages,
@@ -148,7 +148,7 @@ export async function saveChat(
  * @returns Array of UI messages
  */
 export async function loadChat(
-  db: NeonHttpDatabase,
+  db: AppDb,
   {
     chatId,
   }: {

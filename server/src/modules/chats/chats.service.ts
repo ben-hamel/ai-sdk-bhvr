@@ -6,11 +6,11 @@ import {
 } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { desc } from "drizzle-orm";
-import type { NeonHttpDatabase } from "drizzle-orm/neon-http";
+import type { AppDb } from "../../db";
 import { chats } from "../../db/schema/chats";
 import { loadChat, saveChat } from "./chats.repository";
 
-export async function getAllChats(db: NeonHttpDatabase) {
+export async function getAllChats(db: AppDb) {
   return await db
     .select({
       id: chats.id,
@@ -21,21 +21,25 @@ export async function getAllChats(db: NeonHttpDatabase) {
     .orderBy(desc(chats.updatedAt));
 }
 
-export async function createChat(db: NeonHttpDatabase) {
+export async function createChat(db: AppDb) {
   const [chat] = await db.insert(chats).values({}).returning({ id: chats.id });
   return chat;
 }
 
-export async function getChatMessages(db: NeonHttpDatabase, chatId: string) {
+export async function getChatMessages(
+  db: AppDb,
+  chatId: string,
+) {
   const messages = await loadChat(db, { chatId });
   return messages;
 }
 
 export async function streamChatMessages(
-  db: NeonHttpDatabase,
+  db: AppDb,
   chatId: string,
   messages: UIMessage[],
   googleApiKey: string,
+  onPersistComplete?: () => Promise<void> | void,
 ) {
   const google = createGoogleGenerativeAI({
     apiKey: googleApiKey,
@@ -72,10 +76,14 @@ export async function streamChatMessages(
       }
     },
     async onFinish({ messages: allMessages }) {
-      await saveChat(db, {
-        chatId,
-        messages: allMessages,
-      });
+      try {
+        await saveChat(db, {
+          chatId,
+          messages: allMessages,
+        });
+      } finally {
+        await onPersistComplete?.();
+      }
     },
   });
 }

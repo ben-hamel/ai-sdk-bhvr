@@ -13,7 +13,7 @@ const isAdminRole = (role?: string | string[] | null) => {
 const admin = new Hono<{ Bindings: Env }>();
 
 admin.use("*", async (c, next) => {
-  const session = await auth(c.env).api.getSession({
+  const session = await auth().api.getSession({
     headers: c.req.raw.headers,
   });
 

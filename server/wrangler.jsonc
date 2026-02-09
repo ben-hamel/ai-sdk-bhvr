@@ -17,11 +17,11 @@
   "vars": {
     "CORS_ORIGIN": "https://aisdk-app.eastcoastdev.online",
     "BETTER_AUTH_URL": "https://api2.eastcoastdev.online"
-  }
-  // "hyperdrive": [
-  // 	{
-  // 		"binding": "HYPERDRIVE",
-  // 		"id": "859366a18a4e4a299b0eab588ae0cb2c"
-  // 	}
-  // ]
+  },
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "b400bdc642994ca9ae192cf137913929"
+    }
+  ]
 }

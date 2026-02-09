@@ -1,13 +1,17 @@
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
+// import { neon } from "@neondatabase/serverless";
+// import { drizzle } from "drizzle-orm/neon-http";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { betterAuth } from "better-auth";
 import { betterAuthOptions } from "./options";
 import * as schema from "../../db/schema/auth";
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { env } from "cloudflare:workers";
+// import { db } from "../../db/index"
 
-export const auth = (env: Env) => {
-  const sql = neon(env.DATABASE_URL);
-  const db = drizzle(sql);
+
+export const auth = () => {
+
+  const db = drizzle(env.DATABASE_URL); // This will work, it seems liek if db is called outside here then i get the refresh issue
 
   return betterAuth({
     ...betterAuthOptions,
@@ -23,11 +27,6 @@ export const auth = (env: Env) => {
       },
     },
     advanced: {
-      // defaultCookieAttributes: {
-      //   sameSite: "none",
-      //   secure: true,
-      //   path: "/",
-      // },
       cookies: {
         state: {
           attributes: {
