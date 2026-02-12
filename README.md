@@ -1,6 +1,6 @@
-# ai-sdk-bhvr
+# Name of the project coming soon
 
-A monorepo template built with Bun, Hono, Vite, and React.
+This project is mainly to learn Cloudflares compute offerings as well as learn better auth, and trial run a couple differnt AI frameworks including mastra, Vercel AI SDK, and more. The goal is try decided on my personal web stack.
 
 ## Getting Started
 
