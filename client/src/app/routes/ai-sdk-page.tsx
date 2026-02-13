@@ -179,9 +179,6 @@ export const AiSdkPage = () => {
                         <p className="truncate">
                           {chat.title || `Chat ${chat.id.slice(0, 8)}`}
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(chat.updatedAt).toLocaleString()}
-                        </p>
                       </Link>
                       {isAdmin ? (
                         <DropdownMenu>
