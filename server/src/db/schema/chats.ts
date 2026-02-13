@@ -11,6 +11,7 @@ export const aisdk = pgSchema("aisdk");
 // Chat sessions table
 export const chats = aisdk.table("chats", {
   id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

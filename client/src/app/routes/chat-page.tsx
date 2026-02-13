@@ -25,7 +25,7 @@ import { SERVER_URL } from "@/constants";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import type { CustomMessage } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth-client";
@@ -72,6 +72,12 @@ export const ChatPage = () => {
   const [text, setText] = useState<string>("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { chatId } = useParams<{ chatId: string }>();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const hasSentInitialMessage = useRef(false);
+  const initialMessageText =
+    (location.state as { initialMessageText?: string } | null)
+      ?.initialMessageText ?? null;
 
   const { messages, status, sendMessage, setMessages } = useChat<CustomMessage>(
     {
@@ -97,10 +103,39 @@ export const ChatPage = () => {
   // Set messages when chat history is loaded
   useEffect(() => {
     if (chatHistory) {
-      console.log("Loaded chat history:", chatHistory);
       setMessages(chatHistory);
     }
   }, [chatHistory, setMessages]);
+
+  useEffect(() => {
+    if (!chatId || !chatHistory || !initialMessageText || hasSentInitialMessage.current) {
+      return;
+    }
+
+    hasSentInitialMessage.current = true;
+    if (chatHistory.length === 0) {
+      sendMessage(
+        {
+          text: initialMessageText,
+        },
+        {
+          body: {
+            chatId,
+            webSearch: false,
+          },
+        },
+      );
+    }
+
+    navigate(location.pathname, { replace: true, state: null });
+  }, [
+    chatHistory,
+    chatId,
+    initialMessageText,
+    location.pathname,
+    navigate,
+    sendMessage,
+  ]);
 
   const tokenUsage = useMemo(() => {
     return messages.reduce(
@@ -140,9 +175,9 @@ export const ChatPage = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 relative size-full rounded-lg border h-[600px]">
-      <div className="flex flex-col h-full">
-        <Conversation>
+    <div className="flex h-full min-h-0 flex-col px-4 pb-4 pt-2 md:px-6 md:pb-6 md:pt-3">
+      <div className="mx-auto flex h-full min-h-0 w-full max-w-5xl flex-col">
+        <Conversation className="min-h-0">
           <ConversationContent>
             {messages.map((message) => (
               <Message from={message.role} key={message.id}>
@@ -166,12 +201,7 @@ export const ChatPage = () => {
           <ConversationScrollButton />
         </Conversation>
 
-        <PromptInput
-          onSubmit={handleSubmit}
-          className="mt-4"
-          globalDrop
-          multiple
-        >
+        <PromptInput onSubmit={handleSubmit} className="mt-3" globalDrop multiple>
           <PromptInputBody>
             <ChatAttachments />
             <PromptInputTextarea

@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import type { UIMessage } from "ai";
 import { Client } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
+import { z } from "zod";
 import * as chatService from "./chats.service";
 
 type Bindings = {
@@ -10,6 +11,9 @@ type Bindings = {
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
+const renameChatSchema = z.object({
+  title: z.string().max(120),
+});
 
 // Get all chats
 app.get("/", async (c) => {
@@ -44,6 +48,63 @@ app.post("/", async (c) => {
   } catch (error) {
     console.error(error);
     return c.json({ error: "Failed to create chat" }, { status: 500 });
+  } finally {
+    await client.end();
+  }
+});
+
+// Delete chat by ID
+app.delete("/:chatId", async (c) => {
+  const chatId = c.req.param("chatId");
+  const client = new Client({
+    connectionString: c.env.HYPERDRIVE.connectionString,
+  });
+  await client.connect();
+  const db = drizzle(client);
+
+  try {
+    const deleted = await chatService.deleteChat(db, chatId);
+    if (!deleted) {
+      return c.json({ error: "Chat not found" }, { status: 404 });
+    }
+    return c.json({ id: deleted.id });
+  } catch (error) {
+    console.error(error);
+    return c.json({ error: "Failed to delete chat" }, { status: 500 });
+  } finally {
+    await client.end();
+  }
+});
+
+// Rename chat by ID
+app.patch("/:chatId", async (c) => {
+  const chatId = c.req.param("chatId");
+  const client = new Client({
+    connectionString: c.env.HYPERDRIVE.connectionString,
+  });
+  await client.connect();
+  const db = drizzle(client);
+
+  try {
+    const payload = renameChatSchema.safeParse(await c.req.json());
+    if (!payload.success) {
+      return c.json({ error: "Invalid title" }, { status: 400 });
+    }
+
+    const nextTitle = payload.data.title.trim();
+    const updated = await chatService.renameChat(
+      db,
+      chatId,
+      nextTitle.length ? nextTitle : null,
+    );
+    if (!updated) {
+      return c.json({ error: "Chat not found" }, { status: 404 });
+    }
+
+    return c.json(updated);
+  } catch (error) {
+    console.error(error);
+    return c.json({ error: "Failed to rename chat" }, { status: 500 });
   } finally {
     await client.end();
   }

@@ -226,3 +226,45 @@ export async function loadChat(
     throw error;
   }
 }
+
+export async function deleteChatById(
+  db: AppDb,
+  {
+    chatId,
+  }: {
+    chatId: string;
+  },
+) {
+  const [deleted] = await db
+    .delete(chats)
+    .where(eq(chats.id, chatId))
+    .returning({ id: chats.id });
+
+  return deleted;
+}
+
+export async function renameChatById(
+  db: AppDb,
+  {
+    chatId,
+    title,
+  }: {
+    chatId: string;
+    title: string | null;
+  },
+) {
+  const [updated] = await db
+    .update(chats)
+    .set({
+      title,
+      updatedAt: sql`NOW()`,
+    })
+    .where(eq(chats.id, chatId))
+    .returning({
+      id: chats.id,
+      title: chats.title,
+      updatedAt: chats.updatedAt,
+    });
+
+  return updated;
+}

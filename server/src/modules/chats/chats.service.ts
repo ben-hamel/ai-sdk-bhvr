@@ -8,12 +8,18 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { desc } from "drizzle-orm";
 import type { AppDb } from "../../db";
 import { chats } from "../../db/schema/chats";
-import { loadChat, saveChat } from "./chats.repository";
+import {
+  deleteChatById,
+  loadChat,
+  renameChatById,
+  saveChat,
+} from "./chats.repository";
 
 export async function getAllChats(db: AppDb) {
   return await db
     .select({
       id: chats.id,
+      title: chats.title,
       createdAt: chats.createdAt,
       updatedAt: chats.updatedAt,
     })
@@ -24,6 +30,14 @@ export async function getAllChats(db: AppDb) {
 export async function createChat(db: AppDb) {
   const [chat] = await db.insert(chats).values({}).returning({ id: chats.id });
   return chat;
+}
+
+export async function deleteChat(db: AppDb, chatId: string) {
+  return await deleteChatById(db, { chatId });
+}
+
+export async function renameChat(db: AppDb, chatId: string, title: string | null) {
+  return await renameChatById(db, { chatId, title });
 }
 
 export async function getChatMessages(

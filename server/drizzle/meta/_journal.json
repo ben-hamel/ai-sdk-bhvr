@@ -43,6 +43,13 @@
       "when": 1770518325452,
       "tag": "0005_nebulous_clea",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1770951608067,
+      "tag": "0006_plain_cassandra_nova",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "aisdk"."chats" ADD COLUMN "title" text;
