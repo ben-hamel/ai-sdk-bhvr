@@ -1,4 +1,4 @@
-import { Client, Pool } from "pg";
+import { Client } from "pg";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { env } from "cloudflare:workers";
@@ -11,7 +11,7 @@ export async function createDb(databaseUrl: string): Promise<AppDb> {
   return drizzle(client);
 }
 
-export const db = drizzle(env.DATABASE_URL);
+export const db = drizzle(env.HYPERDRIVE.connectionString);
 
 // const pool = new Pool({
 //   connectionString: process.env.DATABASE_URL,
