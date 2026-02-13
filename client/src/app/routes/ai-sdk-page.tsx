@@ -1,4 +1,3 @@
-import { authClient } from "@/lib/auth-client";
 import { isAdminRole } from "@/lib/auth-roles";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +19,13 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MoreHorizontalIcon } from "lucide-react";
 import { useState } from "react";
-import { Link, Outlet, useLocation, useNavigate } from "react-router";
+import {
+  Link,
+  Outlet,
+  useLocation,
+  useNavigate,
+  useRouteLoaderData,
+} from "react-router";
 
 type ChatSummary = {
   id: string;
@@ -33,10 +38,12 @@ export const AiSdkPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
-  const { data: session } = authClient.useSession();
+  const appLoaderData = useRouteLoaderData("app") as
+    | { session?: { user?: { role?: string | null } } }
+    | undefined;
+  const isAdmin = isAdminRole(appLoaderData?.session?.user?.role);
   const [deletingChatId, setDeletingChatId] = useState<string | null>(null);
   const [renamingChatId, setRenamingChatId] = useState<string | null>(null);
-  const isAdmin = isAdminRole(session?.user?.role);
 
   const { data: chats, isLoading: isLoadingChats } = useQuery({
     queryKey: ["chats"],
@@ -154,7 +161,7 @@ export const AiSdkPage = () => {
 
           <div className="min-h-0 flex-1 space-y-2 border-t pt-5">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Previous Chats
+              Recent chats
             </p>
             <div className="h-full overflow-y-auto pr-1">
               {isLoadingChats ? (
@@ -163,8 +170,10 @@ export const AiSdkPage = () => {
                 </p>
               ) : chats?.length ? (
                 <div className="space-y-1">
-                  {chats.map((chat) => (
-                    <div
+                  {chats.map((chat) => {
+                    const displayTitle = chat.title?.trim() || "New Chat";
+                    return (
+                      <div
                       key={chat.id}
                       className={cn(
                         "flex items-start gap-2 rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-background/70 hover:text-foreground",
@@ -177,7 +186,7 @@ export const AiSdkPage = () => {
                         className="min-w-0 flex-1"
                       >
                         <p className="truncate">
-                          {chat.title || `Chat ${chat.id.slice(0, 8)}`}
+                          {displayTitle}
                         </p>
                       </Link>
                       {isAdmin ? (
@@ -214,8 +223,9 @@ export const AiSdkPage = () => {
                           </DropdownMenuContent>
                         </DropdownMenu>
                       ) : null}
-                    </div>
-                  ))}
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="px-2 py-1 text-sm text-muted-foreground">
@@ -237,10 +247,12 @@ export const AiSdkPage = () => {
 export const AiSdkIndexPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { data: session } = authClient.useSession();
+  const appLoaderData = useRouteLoaderData("app") as
+    | { session?: { user?: { role?: string | null } } }
+    | undefined;
   const [text, setText] = useState("");
   const [isStartingChat, setIsStartingChat] = useState(false);
-  const isAdmin = isAdminRole(session?.user?.role);
+  const isAdmin = isAdminRole(appLoaderData?.session?.user?.role);
 
   const handleSubmit = async (message: PromptInputMessage) => {
     const initialMessageText = message.text?.trim() ?? "";
@@ -261,9 +273,30 @@ export const AiSdkIndexPage = () => {
       if (!data.id) {
         throw new Error("Chat id not returned");
       }
+      const chatId = data.id;
+
+      const nowIso = new Date().toISOString();
+      queryClient.setQueryData<ChatSummary[]>(["chats"], (existingChats) => {
+        const nextChat: ChatSummary = {
+          id: chatId,
+          title: null,
+          createdAt: nowIso,
+          updatedAt: nowIso,
+        };
+
+        if (!existingChats?.length) {
+          return [nextChat];
+        }
+
+        if (existingChats.some((chat) => chat.id === chatId)) {
+          return existingChats;
+        }
+
+        return [nextChat, ...existingChats];
+      });
 
       await queryClient.invalidateQueries({ queryKey: ["chats"] });
-      navigate(`/app/ai-sdk/chat/${data.id}`, {
+      navigate(`/app/ai-sdk/chat/${chatId}`, {
         state: { initialMessageText },
       });
       setText("");

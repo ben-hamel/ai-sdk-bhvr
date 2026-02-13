@@ -21,24 +21,21 @@ import {
   usePromptInputAttachments,
 } from "@/components/ai-elements/prompt-input";
 import { Response } from "@/components/ai-elements/response";
+import { Spinner } from "@/components/ui/spinner";
 import { SERVER_URL } from "@/constants";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useRouteLoaderData,
+} from "react-router";
 import type { CustomMessage } from "@shared/types";
-import { useQuery } from "@tanstack/react-query";
-import { authClient } from "@/lib/auth-client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { isAdminRole } from "@/lib/auth-roles";
-
-export async function chatLoader() {
-  const { data: session } = await authClient.getSession();
-  if (!session || !isAdminRole(session.user?.role)) {
-    throw new globalThis.Response("Not Found", { status: 404 });
-  }
-
-  return { session };
-}
+import { NotFoundPage } from "@/app/routes/not-found";
 
 const ChatAttachments = () => {
   const { files, remove } = usePromptInputAttachments();
@@ -69,11 +66,21 @@ const ChatAttachments = () => {
 };
 
 export const ChatPage = () => {
+  const appLoaderData = useRouteLoaderData("app") as
+    | { session?: { user?: { role?: string | null } } }
+    | undefined;
+  const isAdmin = isAdminRole(appLoaderData?.session?.user?.role);
+
+  if (!isAdmin) {
+    return <NotFoundPage />;
+  }
+
   const [text, setText] = useState<string>("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { chatId } = useParams<{ chatId: string }>();
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const hasSentInitialMessage = useRef(false);
   const initialMessageText =
     (location.state as { initialMessageText?: string } | null)
@@ -84,6 +91,9 @@ export const ChatPage = () => {
       transport: new DefaultChatTransport({
         api: `${SERVER_URL}/api/v1/chats/${chatId}/messages`,
       }),
+      onFinish: () => {
+        void queryClient.invalidateQueries({ queryKey: ["chats"] });
+      },
     },
   );
 
@@ -151,12 +161,52 @@ export const ChatPage = () => {
     );
   }, [messages]);
 
+  const isResponding = status === "submitted" || status === "streaming";
+  const lastMessage = messages.at(-1);
+  const lastAssistantHasText =
+    lastMessage?.role === "assistant" &&
+    lastMessage.parts.some(
+      (part) => part.type === "text" && part.text.trim().length > 0,
+    );
+  const showStreamingIndicator = isResponding && !lastAssistantHasText;
+
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
     const hasAttachments = Boolean(message.files?.length);
 
     if (!(hasText || hasAttachments)) {
       return;
+    }
+
+    if (chatId) {
+      const nowIso = new Date().toISOString();
+      queryClient.setQueryData<
+        Array<{
+          id: string;
+          title: string | null;
+          createdAt: string;
+          updatedAt: string;
+        }>
+      >(["chats"], (existingChats) => {
+        if (!existingChats?.length) {
+          return existingChats;
+        }
+
+        const target = existingChats.find((chat) => chat.id === chatId);
+        if (!target) {
+          return existingChats;
+        }
+
+        const movedChat = {
+          ...target,
+          updatedAt: nowIso,
+        };
+
+        return [
+          movedChat,
+          ...existingChats.filter((chat) => chat.id !== chatId),
+        ];
+      });
     }
 
     sendMessage(
@@ -197,6 +247,23 @@ export const ChatPage = () => {
                 </MessageContent>
               </Message>
             ))}
+            {showStreamingIndicator ? (
+              <Message from="assistant">
+                <MessageContent>
+                  <div
+                    className="inline-flex items-center text-muted-foreground"
+                    aria-live="polite"
+                    aria-label={
+                      status === "submitted"
+                        ? "Waiting for response"
+                        : "Streaming response"
+                    }
+                  >
+                    <Spinner className="size-4" />
+                  </div>
+                </MessageContent>
+              </Message>
+            ) : null}
           </ConversationContent>
           <ConversationScrollButton />
         </Conversation>
@@ -238,7 +305,10 @@ export const ChatPage = () => {
                 </ContextContent>
               </Context>
             </PromptInputTools>
-            <PromptInputSubmit disabled={!text && !status} status={status} />
+            <PromptInputSubmit
+              disabled={!text.trim() || status === "submitted" || status === "streaming"}
+              status={status}
+            />
           </PromptInputFooter>
         </PromptInput>
       </div>

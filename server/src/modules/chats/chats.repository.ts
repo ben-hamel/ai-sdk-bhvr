@@ -1,5 +1,5 @@
 import type { UIMessage } from "ai";
-import { asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, isNull, sql } from "drizzle-orm";
 import type { AppDb } from "../../db";
 import { chats, messages } from "../../db/schema/chats";
 import { parts } from "../../db/schema/parts";
@@ -260,6 +260,32 @@ export async function renameChatById(
       updatedAt: sql`NOW()`,
     })
     .where(eq(chats.id, chatId))
+    .returning({
+      id: chats.id,
+      title: chats.title,
+      updatedAt: chats.updatedAt,
+    });
+
+  return updated;
+}
+
+export async function setChatTitleIfMissing(
+  db: AppDb,
+  {
+    chatId,
+    title,
+  }: {
+    chatId: string;
+    title: string;
+  },
+) {
+  const [updated] = await db
+    .update(chats)
+    .set({
+      title,
+      updatedAt: sql`NOW()`,
+    })
+    .where(and(eq(chats.id, chatId), isNull(chats.title)))
     .returning({
       id: chats.id,
       title: chats.title,

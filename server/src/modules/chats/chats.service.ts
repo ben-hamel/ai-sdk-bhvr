@@ -13,6 +13,7 @@ import {
   loadChat,
   renameChatById,
   saveChat,
+  setChatTitleIfMissing,
 } from "./chats.repository";
 
 export async function getAllChats(db: AppDb) {
@@ -95,9 +96,132 @@ export async function streamChatMessages(
           chatId,
           messages: allMessages,
         });
+
+        const autoTitle = generateRuleBasedTitle(allMessages);
+        if (autoTitle) {
+          try {
+            await setChatTitleIfMissing(db, { chatId, title: autoTitle });
+          } catch (error) {
+            console.error("streamChatMessages: Failed to auto-title chat:", error);
+          }
+        }
       } finally {
         await onPersistComplete?.();
       }
     },
   });
+}
+
+function generateRuleBasedTitle(messages: UIMessage[]): string | null {
+  const firstUserText = extractFirstUserText(messages);
+  if (!firstUserText) {
+    return null;
+  }
+
+  const firstAssistantText = extractFirstAssistantText(messages);
+  const sourceText = firstAssistantText
+    ? `${firstUserText} ${firstAssistantText}`
+    : firstUserText;
+
+  const sanitized = sourceText
+    .replace(/[`"'()[\]{}<>_*~]/g, " ")
+    .replace(/[.,!?;:/\\|]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!sanitized) {
+    return null;
+  }
+
+  const stopWords = new Set([
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "by",
+    "for",
+    "from",
+    "how",
+    "i",
+    "in",
+    "is",
+    "it",
+    "of",
+    "on",
+    "or",
+    "please",
+    "the",
+    "this",
+    "to",
+    "with",
+    "you",
+    "your",
+  ]);
+
+  const rawWords = sanitized.split(" ").filter(Boolean);
+  const keywords = rawWords.filter((word) => !stopWords.has(word.toLowerCase()));
+  const sourceWords = keywords.length >= 2 ? keywords : rawWords;
+  const maxWords = 6;
+  const truncatedWords = sourceWords.slice(0, maxWords);
+  const title = toTitleCase(truncatedWords.join(" "));
+
+  return title.length > 120 ? title.slice(0, 120).trim() : title;
+}
+
+function extractFirstUserText(messages: UIMessage[]): string | null {
+  for (const message of messages) {
+    if (message.role !== "user") {
+      continue;
+    }
+
+    const text = message.parts
+      .filter((part) => part.type === "text")
+      .map((part) => part.text)
+      .join(" ")
+      .trim();
+
+    if (text) {
+      return text;
+    }
+  }
+
+  return null;
+}
+
+function extractFirstAssistantText(messages: UIMessage[]): string | null {
+  for (const message of messages) {
+    if (message.role !== "assistant") {
+      continue;
+    }
+
+    const text = message.parts
+      .filter((part) => part.type === "text")
+      .map((part) => part.text)
+      .join(" ")
+      .trim();
+
+    if (!text) {
+      continue;
+    }
+
+    const cleanedText = text
+      .replace(/^(sure|okay|ok|great|absolutely|certainly)[,!.\s]+/i, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    return cleanedText.slice(0, 120);
+  }
+
+  return null;
+}
+
+function toTitleCase(value: string): string {
+  return value
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
 }
