@@ -1,5 +1,6 @@
 import { isAdminRole } from "@/lib/auth-roles";
 import { Button } from "@/components/ui/button";
+import { chatsQueryOptions, type ChatSummary } from "@/app/queries/chats";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,13 +28,6 @@ import {
   useRouteLoaderData,
 } from "react-router";
 
-type ChatSummary = {
-  id: string;
-  title: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
-
 export const AiSdkPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -45,17 +39,9 @@ export const AiSdkPage = () => {
   const [deletingChatId, setDeletingChatId] = useState<string | null>(null);
   const [renamingChatId, setRenamingChatId] = useState<string | null>(null);
 
-  const { data: chats, isLoading: isLoadingChats } = useQuery({
-    queryKey: ["chats"],
-    queryFn: async () => {
-      const response = await fetch(`${SERVER_URL}/api/v1/chats`);
-      if (!response.ok) {
-        throw new Error("Failed to load chats");
-      }
-      return (await response.json()) as ChatSummary[];
-    },
-    enabled: isAdmin,
-  });
+  const { data: chats, isLoading: isLoadingChats } = useQuery(
+    chatsQueryOptions(isAdmin),
+  );
 
   const handleDeleteChat = async (chatId: string) => {
     if (!isAdmin || deletingChatId || renamingChatId) {
@@ -117,10 +103,10 @@ export const AiSdkPage = () => {
         return existingChats.map((existingChat) =>
           existingChat.id === chat.id
             ? {
-                ...existingChat,
-                title: optimisticTitle,
-                updatedAt: new Date().toISOString(),
-              }
+              ...existingChat,
+              title: optimisticTitle,
+              updatedAt: new Date().toISOString(),
+            }
             : existingChat,
         );
       });
@@ -174,55 +160,55 @@ export const AiSdkPage = () => {
                     const displayTitle = chat.title?.trim() || "New Chat";
                     return (
                       <div
-                      key={chat.id}
-                      className={cn(
-                        "flex items-start gap-2 rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-background/70 hover:text-foreground",
-                        location.pathname === `/app/ai-sdk/chat/${chat.id}` &&
+                        key={chat.id}
+                        className={cn(
+                          "flex items-start gap-2 rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-background/70 hover:text-foreground",
+                          location.pathname === `/app/ai-sdk/chat/${chat.id}` &&
                           "bg-background font-medium text-foreground",
-                      )}
-                    >
-                      <Link
-                        to={`/app/ai-sdk/chat/${chat.id}`}
-                        className="min-w-0 flex-1"
+                        )}
                       >
-                        <p className="truncate">
-                          {displayTitle}
-                        </p>
-                      </Link>
-                      {isAdmin ? (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon-xs"
-                              className="shrink-0"
-                              disabled={Boolean(deletingChatId || renamingChatId)}
-                              aria-label={`Open actions for chat ${chat.id.slice(0, 8)}`}
-                            >
-                              <MoreHorizontalIcon />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              disabled={Boolean(deletingChatId || renamingChatId)}
-                              onSelect={() => {
-                                void handleRenameChat(chat);
-                              }}
-                            >
-                              {renamingChatId === chat.id ? "Renaming..." : "Rename"}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="text-destructive focus:text-destructive"
-                              disabled={Boolean(deletingChatId || renamingChatId)}
-                              onSelect={() => {
-                                void handleDeleteChat(chat.id);
-                              }}
-                            >
-                              {deletingChatId === chat.id ? "Deleting..." : "Delete"}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      ) : null}
+                        <Link
+                          to={`/app/ai-sdk/chat/${chat.id}`}
+                          className="min-w-0 flex-1"
+                        >
+                          <p className="truncate">
+                            {displayTitle}
+                          </p>
+                        </Link>
+                        {isAdmin ? (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon-xs"
+                                className="shrink-0"
+                                disabled={Boolean(deletingChatId || renamingChatId)}
+                                aria-label={`Open actions for chat ${chat.id.slice(0, 8)}`}
+                              >
+                                <MoreHorizontalIcon />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                disabled={Boolean(deletingChatId || renamingChatId)}
+                                onSelect={() => {
+                                  void handleRenameChat(chat);
+                                }}
+                              >
+                                {renamingChatId === chat.id ? "Renaming..." : "Rename"}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                disabled={Boolean(deletingChatId || renamingChatId)}
+                                onSelect={() => {
+                                  void handleDeleteChat(chat.id);
+                                }}
+                              >
+                                {deletingChatId === chat.id ? "Deleting..." : "Delete"}
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        ) : null}
                       </div>
                     );
                   })}
