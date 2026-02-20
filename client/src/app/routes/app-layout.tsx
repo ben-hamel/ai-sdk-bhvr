@@ -1,7 +1,7 @@
-import { authClient } from "@/lib/auth-client";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { Link, Outlet, redirect, useLocation, useNavigate } from "react-router";
+import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 
 export async function appLoader() {
   const { data: session } = await authClient.getSession();

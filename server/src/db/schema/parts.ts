@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   boolean,
   check,
@@ -8,7 +9,6 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 import { aisdk, messages } from "./chats";
 
 // Parts table - stores individual message parts with type preservation

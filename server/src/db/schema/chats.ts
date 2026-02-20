@@ -1,10 +1,4 @@
-import {
-  index,
-  pgSchema,
-  text,
-  timestamp,
-  uuid,
-} from "drizzle-orm/pg-core";
+import { index, pgSchema, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export const aisdk = pgSchema("aisdk");
 

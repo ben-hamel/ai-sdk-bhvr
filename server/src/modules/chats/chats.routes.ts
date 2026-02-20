@@ -1,7 +1,7 @@
-import { Hono } from "hono";
 import type { UIMessage } from "ai";
-import { Client } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
+import { Hono } from "hono";
+import { Client } from "pg";
 import { z } from "zod";
 import * as chatService from "./chats.service";
 

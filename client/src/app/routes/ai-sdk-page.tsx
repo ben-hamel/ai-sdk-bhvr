@@ -1,22 +1,3 @@
-import { isAdminRole } from "@/lib/auth-roles";
-import { Button } from "@/components/ui/button";
-import { chatsQueryOptions, type ChatSummary } from "@/app/queries/chats";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { SERVER_URL } from "@/constants";
-import { cn } from "@/lib/utils";
-import {
-  PromptInput,
-  PromptInputBody,
-  PromptInputFooter,
-  type PromptInputMessage,
-  PromptInputSubmit,
-  PromptInputTextarea,
-} from "@/components/ai-elements/prompt-input";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MoreHorizontalIcon } from "lucide-react";
 import { useState } from "react";
@@ -27,6 +8,25 @@ import {
   useNavigate,
   useRouteLoaderData,
 } from "react-router";
+import { type ChatSummary, chatsQueryOptions } from "@/app/queries/chats";
+import {
+  PromptInput,
+  PromptInputBody,
+  PromptInputFooter,
+  type PromptInputMessage,
+  PromptInputSubmit,
+  PromptInputTextarea,
+} from "@/components/ai-elements/prompt-input";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { SERVER_URL } from "@/constants";
+import { isAdminRole } from "@/lib/auth-roles";
+import { cn } from "@/lib/utils";
 
 export const AiSdkPage = () => {
   const navigate = useNavigate();
@@ -103,10 +103,10 @@ export const AiSdkPage = () => {
         return existingChats.map((existingChat) =>
           existingChat.id === chat.id
             ? {
-              ...existingChat,
-              title: optimisticTitle,
-              updatedAt: new Date().toISOString(),
-            }
+                ...existingChat,
+                title: optimisticTitle,
+                updatedAt: new Date().toISOString(),
+              }
             : existingChat,
         );
       });
@@ -164,16 +164,14 @@ export const AiSdkPage = () => {
                         className={cn(
                           "flex items-start gap-2 rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-background/70 hover:text-foreground",
                           location.pathname === `/app/ai-sdk/chat/${chat.id}` &&
-                          "bg-background font-medium text-foreground",
+                            "bg-background font-medium text-foreground",
                         )}
                       >
                         <Link
                           to={`/app/ai-sdk/chat/${chat.id}`}
                           className="min-w-0 flex-1"
                         >
-                          <p className="truncate">
-                            {displayTitle}
-                          </p>
+                          <p className="truncate">{displayTitle}</p>
                         </Link>
                         {isAdmin ? (
                           <DropdownMenu>
@@ -182,7 +180,9 @@ export const AiSdkPage = () => {
                                 variant="ghost"
                                 size="icon-xs"
                                 className="shrink-0"
-                                disabled={Boolean(deletingChatId || renamingChatId)}
+                                disabled={Boolean(
+                                  deletingChatId || renamingChatId,
+                                )}
                                 aria-label={`Open actions for chat ${chat.id.slice(0, 8)}`}
                               >
                                 <MoreHorizontalIcon />
@@ -190,21 +190,29 @@ export const AiSdkPage = () => {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
-                                disabled={Boolean(deletingChatId || renamingChatId)}
+                                disabled={Boolean(
+                                  deletingChatId || renamingChatId,
+                                )}
                                 onSelect={() => {
                                   void handleRenameChat(chat);
                                 }}
                               >
-                                {renamingChatId === chat.id ? "Renaming..." : "Rename"}
+                                {renamingChatId === chat.id
+                                  ? "Renaming..."
+                                  : "Rename"}
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="text-destructive focus:text-destructive"
-                                disabled={Boolean(deletingChatId || renamingChatId)}
+                                disabled={Boolean(
+                                  deletingChatId || renamingChatId,
+                                )}
                                 onSelect={() => {
                                   void handleDeleteChat(chat.id);
                                 }}
                               >
-                                {deletingChatId === chat.id ? "Deleting..." : "Delete"}
+                                {deletingChatId === chat.id
+                                  ? "Deleting..."
+                                  : "Delete"}
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>

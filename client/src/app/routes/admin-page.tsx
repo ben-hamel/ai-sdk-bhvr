@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
-import { authClient } from "@/lib/auth-client";
-import { isAdminRole } from "@/lib/auth-roles";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,15 +10,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { authClient } from "@/lib/auth-client";
+import { isAdminRole } from "@/lib/auth-roles";
 
 type AdminUser = {
   id: string;
@@ -115,21 +111,24 @@ export const AdminPage = () => {
     return role;
   };
 
-  const getRoleTokens = (value: string) => {
+  const getRoleTokens = useCallback((value: string) => {
     return value
       .split(",")
       .map((part) => part.trim())
       .filter(Boolean);
-  };
+  }, []);
 
-  const parseRoleInput = (value: string) => {
+  const parseRoleInput = useCallback((value: string) => {
     const trimmed = getRoleTokens(value);
     if (trimmed.length === 0) return null;
     if (trimmed.length === 1) return trimmed[0];
     return trimmed;
-  };
+  }, [getRoleTokens]);
 
-  const roleTokens = useMemo(() => getRoleTokens(roleInput), [roleInput]);
+  const roleTokens = useMemo(
+    () => getRoleTokens(roleInput),
+    [roleInput, getRoleTokens],
+  );
   const roleTokenDuplicates = useMemo(() => {
     const seen = new Set<string>();
     const duplicates = new Set<string>();
@@ -149,7 +148,7 @@ export const AdminPage = () => {
     );
   };
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setIsLoading(true);
     setErrorMessage(null);
 
@@ -176,7 +175,7 @@ export const AdminPage = () => {
     setUsers(nextUsers);
     setTotal(typeof response.total === "number" ? response.total : null);
     setIsLoading(false);
-  };
+  }, []);
 
   const fetchSessions = async (userId: string) => {
     setSessionsLoading(true);
@@ -255,7 +254,9 @@ export const AdminPage = () => {
       userId: selectedUser.id,
       banReason: banReason.trim() || undefined,
       banExpiresIn:
-        durationValue && !Number.isNaN(durationValue) ? durationValue : undefined,
+        durationValue && !Number.isNaN(durationValue)
+          ? durationValue
+          : undefined,
     });
 
     if (error) {
@@ -305,9 +306,7 @@ export const AdminPage = () => {
     if (error) {
       setActionLoading(false);
       setActionError(
-        error instanceof Error
-          ? error.message
-          : "Failed to revoke sessions.",
+        error instanceof Error ? error.message : "Failed to revoke sessions.",
       );
       return;
     }
@@ -335,7 +334,9 @@ export const AdminPage = () => {
       );
       return;
     }
-    const roleLabel = Array.isArray(roleValue) ? roleValue.join(", ") : roleValue;
+    const roleLabel = Array.isArray(roleValue)
+      ? roleValue.join(", ")
+      : roleValue;
     const confirmed = window.confirm(
       `Update roles for ${selectedUser.email || selectedUser.name || "user"} to: ${roleLabel}?`,
     );
@@ -366,7 +367,7 @@ export const AdminPage = () => {
 
   useEffect(() => {
     void fetchUsers();
-  }, []);
+  }, [fetchUsers]);
 
   return (
     <div className="min-h-screen bg-muted/40">
@@ -488,9 +489,11 @@ export const AdminPage = () => {
       </main>
       {selectedUser ? (
         <div className="fixed inset-0 z-50">
-          <div
+          <button
+            type="button"
             className="absolute inset-0 bg-black/40"
             onClick={closeUser}
+            aria-label="Close user details panel"
           />
           <div className="absolute right-0 top-0 h-full w-full max-w-xl border-l bg-background shadow-xl">
             <div className="flex h-full flex-col">
@@ -611,7 +614,9 @@ export const AdminPage = () => {
                     <Button
                       variant="outline"
                       onClick={handleRoleUpdate}
-                      disabled={actionLoading || (session?.user?.id === selectedUser.id)}
+                      disabled={
+                        actionLoading || session?.user?.id === selectedUser.id
+                      }
                     >
                       {actionLoading ? "Updating..." : "Update role"}
                     </Button>
@@ -651,7 +656,9 @@ export const AdminPage = () => {
                       <Button
                         variant="destructive"
                         onClick={handleBanToggle}
-                        disabled={actionLoading || (session?.user?.id === selectedUser.id)}
+                        disabled={
+                          actionLoading || session?.user?.id === selectedUser.id
+                        }
                       >
                         {actionLoading ? "Working..." : "Ban user"}
                       </Button>
@@ -698,15 +705,15 @@ export const AdminPage = () => {
                       </div>
                     ) : null}
                     {!sessionsError &&
-                      !sessionsLoading &&
-                      sessions.length === 0 ? (
+                    !sessionsLoading &&
+                    sessions.length === 0 ? (
                       <div className="text-sm text-muted-foreground">
                         No active sessions.
                       </div>
                     ) : null}
                     {!sessionsError &&
-                      !sessionsLoading &&
-                      sessions.length > 0 ? (
+                    !sessionsLoading &&
+                    sessions.length > 0 ? (
                       <div className="space-y-3">
                         {sessions.map((session) => (
                           <div
@@ -720,7 +727,9 @@ export const AdminPage = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleRevokeSession(session.token)}
+                                onClick={() =>
+                                  handleRevokeSession(session.token)
+                                }
                                 disabled={actionLoading || !session.token}
                               >
                                 Revoke
@@ -734,9 +743,7 @@ export const AdminPage = () => {
                                 Expires: {formatSessionDate(session.expiresAt)}
                               </div>
                               <div>IP: {session.ipAddress || "—"}</div>
-                              <div>
-                                User agent: {session.userAgent || "—"}
-                              </div>
+                              <div>User agent: {session.userAgent || "—"}</div>
                             </div>
                           </div>
                         ))}

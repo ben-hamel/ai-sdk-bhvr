@@ -1,7 +1,7 @@
-import { Client } from "pg";
+import { env } from "cloudflare:workers";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { env } from "cloudflare:workers";
+import { Client } from "pg";
 
 export type AppDb = NodePgDatabase<Record<string, never>>;
 
@@ -18,4 +18,3 @@ export const db = drizzle(env.HYPERDRIVE.connectionString);
 // });
 
 // export const db = drizzle({ client: pool });
-

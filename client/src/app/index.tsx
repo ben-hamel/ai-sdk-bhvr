@@ -1,5 +1,5 @@
-import { AppProvider } from "./provider";
 import { RouterProvider } from "react-router";
+import { AppProvider } from "./provider";
 import { router } from "./router";
 
 function App() {

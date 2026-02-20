@@ -1,15 +1,14 @@
-import { createBrowserRouter } from "react-router";
-import Home from "@/components/Home";
+import { createBrowserRouter, redirect } from "react-router";
+import { AdminPage, adminLoader } from "@/app/routes/admin-page";
+import { AiSdkIndexPage, AiSdkPage } from "@/app/routes/ai-sdk-page";
+import { AppIndexPage } from "@/app/routes/app-index-page";
+import { AppLayout, appLoader } from "@/app/routes/app-layout";
 import { ChatPage } from "@/app/routes/chat-page";
 import { LoginPage } from "@/app/routes/login-page";
-import { SignUpPage } from "@/app/routes/signup-page";
-import { AppLayout, appLoader } from "@/app/routes/app-layout";
-import { AppIndexPage } from "@/app/routes/app-index-page";
-import { AiSdkIndexPage, AiSdkPage } from "@/app/routes/ai-sdk-page";
 import { MastraPage } from "@/app/routes/mastra-page";
-import { AdminPage, adminLoader } from "@/app/routes/admin-page";
 import { NotFoundPage } from "@/app/routes/not-found";
-import { redirect } from "react-router";
+import { SignUpPage } from "@/app/routes/signup-page";
+import Home from "@/components/Home";
 import { authClient } from "@/lib/auth-client";
 
 export const router = createBrowserRouter([

@@ -1,3 +1,15 @@
+import { useChat } from "@ai-sdk/react";
+import type { CustomMessage } from "@shared/types";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { DefaultChatTransport } from "ai";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useRouteLoaderData,
+} from "react-router";
+import { NotFoundPage } from "@/app/routes/not-found";
 import {
   Context,
   ContextContent,
@@ -23,19 +35,7 @@ import {
 import { Response } from "@/components/ai-elements/response";
 import { Spinner } from "@/components/ui/spinner";
 import { SERVER_URL } from "@/constants";
-import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
-import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-  useRouteLoaderData,
-} from "react-router";
-import type { CustomMessage } from "@shared/types";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { isAdminRole } from "@/lib/auth-roles";
-import { NotFoundPage } from "@/app/routes/not-found";
 
 const ChatAttachments = () => {
   const { files, remove } = usePromptInputAttachments();
@@ -71,10 +71,6 @@ export const ChatPage = () => {
     | undefined;
   const isAdmin = isAdminRole(appLoaderData?.session?.user?.role);
 
-  if (!isAdmin) {
-    return <NotFoundPage />;
-  }
-
   const [text, setText] = useState<string>("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { chatId } = useParams<{ chatId: string }>();
@@ -107,7 +103,7 @@ export const ChatPage = () => {
       }
       return res.json() as Promise<CustomMessage[]>;
     },
-    enabled: !!chatId,
+    enabled: isAdmin && !!chatId,
   });
 
   // Set messages when chat history is loaded
@@ -118,7 +114,13 @@ export const ChatPage = () => {
   }, [chatHistory, setMessages]);
 
   useEffect(() => {
-    if (!chatId || !chatHistory || !initialMessageText || hasSentInitialMessage.current) {
+    if (
+      !isAdmin ||
+      !chatId ||
+      !chatHistory ||
+      !initialMessageText ||
+      hasSentInitialMessage.current
+    ) {
       return;
     }
 
@@ -142,6 +144,7 @@ export const ChatPage = () => {
     chatHistory,
     chatId,
     initialMessageText,
+    isAdmin,
     location.pathname,
     navigate,
     sendMessage,
@@ -224,6 +227,10 @@ export const ChatPage = () => {
     setText("");
   };
 
+  if (!isAdmin) {
+    return <NotFoundPage />;
+  }
+
   return (
     <div className="flex h-full min-h-0 flex-col px-4 pb-4 pt-2 md:px-6 md:pb-6 md:pt-3">
       <div className="mx-auto flex h-full min-h-0 w-full max-w-5xl flex-col">
@@ -253,11 +260,6 @@ export const ChatPage = () => {
                   <div
                     className="inline-flex items-center text-muted-foreground"
                     aria-live="polite"
-                    aria-label={
-                      status === "submitted"
-                        ? "Waiting for response"
-                        : "Streaming response"
-                    }
                   >
                     <Spinner className="size-4" />
                   </div>
@@ -268,7 +270,12 @@ export const ChatPage = () => {
           <ConversationScrollButton />
         </Conversation>
 
-        <PromptInput onSubmit={handleSubmit} className="mt-3" globalDrop multiple>
+        <PromptInput
+          onSubmit={handleSubmit}
+          className="mt-3"
+          globalDrop
+          multiple
+        >
           <PromptInputBody>
             <ChatAttachments />
             <PromptInputTextarea
@@ -306,7 +313,9 @@ export const ChatPage = () => {
               </Context>
             </PromptInputTools>
             <PromptInputSubmit
-              disabled={!text.trim() || status === "submitted" || status === "streaming"}
+              disabled={
+                !text.trim() || status === "submitted" || status === "streaming"
+              }
               status={status}
             />
           </PromptInputFooter>

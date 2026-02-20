@@ -1,5 +1,5 @@
-import { SERVER_URL } from "@/constants";
 import { queryOptions } from "@tanstack/react-query";
+import { SERVER_URL } from "@/constants";
 
 export type ChatSummary = {
   id: string;

@@ -1,15 +1,16 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": {
-    "enabled": false,
+    "enabled": true,
     "clientKind": "git",
-    "useIgnoreFile": false
+    "useIgnoreFile": true
   },
   "files": {
     "ignoreUnknown": false,
     "includes": [
       "**",
       "!server/worker-configuration.d.ts",
+      "!server/drizzle/meta",
       "!client/src/components/ai-elements",
       "!client/src/components/ui"
     ]
@@ -27,6 +28,11 @@
     "enabled": true,
     "rules": {
       "recommended": true
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
     }
   }
 }

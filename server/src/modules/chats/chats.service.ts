@@ -1,10 +1,10 @@
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import {
   convertToModelMessages,
   createIdGenerator,
   streamText,
   type UIMessage,
 } from "ai";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { desc } from "drizzle-orm";
 import type { AppDb } from "../../db";
 import { chats } from "../../db/schema/chats";
@@ -37,14 +37,15 @@ export async function deleteChat(db: AppDb, chatId: string) {
   return await deleteChatById(db, { chatId });
 }
 
-export async function renameChat(db: AppDb, chatId: string, title: string | null) {
+export async function renameChat(
+  db: AppDb,
+  chatId: string,
+  title: string | null,
+) {
   return await renameChatById(db, { chatId, title });
 }
 
-export async function getChatMessages(
-  db: AppDb,
-  chatId: string,
-) {
+export async function getChatMessages(db: AppDb, chatId: string) {
   const messages = await loadChat(db, { chatId });
   return messages;
 }
@@ -102,7 +103,10 @@ export async function streamChatMessages(
           try {
             await setChatTitleIfMissing(db, { chatId, title: autoTitle });
           } catch (error) {
-            console.error("streamChatMessages: Failed to auto-title chat:", error);
+            console.error(
+              "streamChatMessages: Failed to auto-title chat:",
+              error,
+            );
           }
         }
       } finally {
@@ -162,7 +166,9 @@ function generateRuleBasedTitle(messages: UIMessage[]): string | null {
   ]);
 
   const rawWords = sanitized.split(" ").filter(Boolean);
-  const keywords = rawWords.filter((word) => !stopWords.has(word.toLowerCase()));
+  const keywords = rawWords.filter(
+    (word) => !stopWords.has(word.toLowerCase()),
+  );
   const sourceWords = keywords.length >= 2 ? keywords : rawWords;
   const maxWords = 6;
   const truncatedWords = sourceWords.slice(0, maxWords);

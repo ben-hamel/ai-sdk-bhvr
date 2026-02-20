@@ -1,14 +1,16 @@
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { betterAuth } from "better-auth";
-import { betterAuthOptions } from "./options";
-import * as schema from "../../db/schema/auth";
-import { drizzle } from "drizzle-orm/node-postgres";
 import { env } from "cloudflare:workers";
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { drizzle } from "drizzle-orm/node-postgres";
+import * as schema from "../../db/schema/auth";
+import { betterAuthOptions } from "./options";
 export const auth = () => {
-
   return betterAuth({
     ...betterAuthOptions,
-    database: drizzleAdapter(drizzle(env.HYPERDRIVE.connectionString), { provider: "pg", schema }),
+    database: drizzleAdapter(drizzle(env.HYPERDRIVE.connectionString), {
+      provider: "pg",
+      schema,
+    }),
     baseURL: env.BETTER_AUTH_URL,
     secret: env.BETTER_AUTH_SECRET,
     trustedOrigins: [env.CORS_ORIGIN || ""],

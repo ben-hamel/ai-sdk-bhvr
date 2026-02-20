@@ -1,6 +1,6 @@
+import { Link } from "react-router";
 import beaver from "@/assets/beaver.svg";
 import { Button } from "./ui/button";
-import { Link } from "react-router";
 
 function Home() {
   return (
