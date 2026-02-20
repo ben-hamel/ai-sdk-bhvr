@@ -165,7 +165,8 @@ export const ChatPage = () => {
   }, [messages]);
 
   const isResponding = status === "submitted" || status === "streaming";
-  const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+  const lastMessage =
+    messages.length > 0 ? messages[messages.length - 1] : null;
   const lastAssistantHasText =
     lastMessage?.role === "assistant" &&
     lastMessage.parts.some(

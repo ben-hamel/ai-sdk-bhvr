@@ -118,12 +118,15 @@ export const AdminPage = () => {
       .filter(Boolean);
   }, []);
 
-  const parseRoleInput = useCallback((value: string) => {
-    const trimmed = getRoleTokens(value);
-    if (trimmed.length === 0) return null;
-    if (trimmed.length === 1) return trimmed[0];
-    return trimmed;
-  }, [getRoleTokens]);
+  const parseRoleInput = useCallback(
+    (value: string) => {
+      const trimmed = getRoleTokens(value);
+      if (trimmed.length === 0) return null;
+      if (trimmed.length === 1) return trimmed[0];
+      return trimmed;
+    },
+    [getRoleTokens],
+  );
 
   const roleTokens = useMemo(
     () => getRoleTokens(roleInput),
