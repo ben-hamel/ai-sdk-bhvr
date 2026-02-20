@@ -165,11 +165,12 @@ export const ChatPage = () => {
   }, [messages]);
 
   const isResponding = status === "submitted" || status === "streaming";
-  const lastMessage = messages.at(-1);
+  const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
   const lastAssistantHasText =
     lastMessage?.role === "assistant" &&
     lastMessage.parts.some(
-      (part) => part.type === "text" && part.text.trim().length > 0,
+      (part: CustomMessage["parts"][number]) =>
+        part.type === "text" && part.text.trim().length > 0,
     );
   const showStreamingIndicator = isResponding && !lastAssistantHasText;
 
