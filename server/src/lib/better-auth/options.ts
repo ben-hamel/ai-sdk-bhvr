@@ -1,5 +1,5 @@
 import type { BetterAuthOptions } from "better-auth";
-import { admin } from "better-auth/plugins";
+import { admin, organization } from "better-auth/plugins";
 
 /**
  * Custom options for Better Auth
@@ -16,5 +16,5 @@ export const betterAuthOptions = {
   emailAndPassword: {
     enabled: true,
   },
-  plugins: [admin()],
+  plugins: [admin(), organization()],
 } satisfies BetterAuthOptions;
