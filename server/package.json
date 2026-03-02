@@ -22,7 +22,7 @@
     "@ai-sdk/google": "^3.0.22",
     "@neondatabase/serverless": "^1.0.2",
     "ai": "catalog:",
-    "better-auth": "^1.4.18",
+    "better-auth": "^1.5.1",
     "drizzle-orm": "^0.45.1",
     "hono": "^4.11.8",
     "pg": "^8.18.0",
@@ -31,9 +31,9 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/node": "^25.2.2",
-    "@types/pg": "^8.16.0",
-    "drizzle-kit": "^0.31.8",
-    "wrangler": "^4.63.0"
+    "@types/node": "^25.3.3",
+    "@types/pg": "^8.18.0",
+    "drizzle-kit": "^0.31.9",
+    "wrangler": "^4.69.0"
   }
 }
