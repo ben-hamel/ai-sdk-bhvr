@@ -7,7 +7,7 @@ export default defineConfig({
   schema: "./src/db/schema/*",
   dialect: "postgresql",
   dbCredentials: {
-    url: process.env.CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE || "",
+    url: process.env.DATABASE_URL || "",
   },
   tablesFilter: ["!mastra_*", "!memory_*"],
 });
