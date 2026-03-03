@@ -50,6 +50,13 @@
       "when": 1770951608067,
       "tag": "0006_plain_cassandra_nova",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1771555387635,
+      "tag": "0007_aromatic_shooting_star",
+      "breakpoints": true
     }
   ]
 }
