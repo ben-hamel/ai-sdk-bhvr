@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { authClient } from "@/lib/auth-client";
-import { isAdminRole } from "@/lib/auth-roles";
+import { requireAdmin } from "@/lib/auth-guard";
 
 type AdminUser = {
   id: string;
@@ -47,12 +47,7 @@ type AdminSession = {
 type AuthRole = "user" | "admin";
 
 export async function adminLoader() {
-  const { data: session } = await authClient.getSession();
-  if (!session || !isAdminRole(session.user?.role)) {
-    throw new Response("Not Found", { status: 404 });
-  }
-
-  return { session };
+  return { session: await requireAdmin() };
 }
 
 export const AdminPage = () => {

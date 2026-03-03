@@ -1,14 +1,11 @@
-import { Link, Outlet, redirect, useLocation, useNavigate } from "react-router";
+import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
+import { requireAuth } from "@/lib/auth-guard";
 import { cn } from "@/lib/utils";
 
 export async function appLoader() {
-  const { data: session } = await authClient.getSession();
-  if (!session) {
-    return redirect("/login");
-  }
-  return { session };
+  return { session: await requireAuth() };
 }
 
 export const AppLayout = () => {
