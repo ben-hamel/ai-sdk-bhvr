@@ -1,12 +1,17 @@
 import { useForm } from "@tanstack/react-form";
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams, Link } from "react-router";
 import z from "zod";
 import { authClient } from "@/lib/auth-client";
 import Loader from "./loader";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+
+const AUTH_ERROR_MESSAGES: Record<string, string> = {
+  signup_disabled:
+    "Account sign-up is currently disabled. Please contact support if you need access.",
+};
 
 function GoogleIcon() {
   return (
@@ -39,9 +44,17 @@ function GoogleIcon() {
 
 export default function SignInForm() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const urlError = searchParams.get("error");
   const { isPending } = authClient.useSession();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [socialError, setSocialError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+
+  const displayError = socialError
+    ?? (urlError
+      ? (AUTH_ERROR_MESSAGES[urlError] ?? "An error occurred. Please try again.")
+      : null);
 
   const handleGoogleSignIn = async () => {
     setSocialError(null);
@@ -67,6 +80,7 @@ export default function SignInForm() {
       password: "",
     },
     onSubmit: async ({ value }) => {
+      setEmailError(null);
       await authClient.signIn.email(
         {
           email: value.email,
@@ -77,7 +91,7 @@ export default function SignInForm() {
             navigate("/app");
           },
           onError: (ctx) => {
-            console.error(ctx.error.message || ctx.error.statusText);
+            setEmailError(ctx.error.message || "Failed to sign in");
           },
         },
       );
@@ -167,6 +181,10 @@ export default function SignInForm() {
             </Button>
           )}
         </form.Subscribe>
+
+        {emailError && (
+          <p className="text-red-500 text-sm">{emailError}</p>
+        )}
       </form>
 
       <div className="relative my-6">
@@ -190,9 +208,16 @@ export default function SignInForm() {
         {isGoogleLoading ? "Signing in..." : "Continue with Google"}
       </Button>
 
-      {socialError && (
-        <p className="mt-2 text-center text-red-500 text-sm">{socialError}</p>
+      {displayError && (
+        <p className="mt-2 text-center text-red-500 text-sm">{displayError}</p>
       )}
+
+      <p className="mt-4 text-center text-sm text-muted-foreground">
+        Don't have an account?{" "}
+        <Link to="/signup" className="underline">
+          Sign up
+        </Link>
+      </p>
     </div>
   );
 }
