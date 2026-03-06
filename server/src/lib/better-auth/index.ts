@@ -1,6 +1,7 @@
 import { env } from "cloudflare:workers";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "../../db/schema/auth";
 import { betterAuthOptions } from "./options";
@@ -22,6 +23,24 @@ export const auth = () => {
       schema,
     }),
     databaseHooks: {
+      session: {
+        create: {
+          before: async (session) => {
+            const [membership] = await db
+              .select({ organizationId: schema.member.organizationId })
+              .from(schema.member)
+              .where(eq(schema.member.userId, session.userId))
+              .limit(1);
+
+            return {
+              data: {
+                ...session,
+                activeOrganizationId: membership?.organizationId ?? null,
+              },
+            };
+          },
+        },
+      },
       user: {
         create: {
           before: async (user) => {
