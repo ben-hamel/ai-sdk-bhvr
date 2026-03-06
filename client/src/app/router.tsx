@@ -6,6 +6,7 @@ import { AppLayout, appLoader } from "@/app/routes/app-layout";
 import { ChatPage } from "@/app/routes/chat-page";
 import { LoginPage } from "@/app/routes/login-page";
 import { MastraPage } from "@/app/routes/mastra-page";
+import { ReceiptsPage } from "@/app/routes/receipts-page";
 import { NotFoundPage } from "@/app/routes/not-found";
 import { SignUpPage } from "@/app/routes/signup-page";
 import Home from "@/components/Home";
@@ -60,6 +61,10 @@ export const router = createBrowserRouter([
       {
         path: "mastra",
         Component: MastraPage,
+      },
+      {
+        path: "receipts",
+        Component: ReceiptsPage,
       },
     ],
   },

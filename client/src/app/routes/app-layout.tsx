@@ -13,6 +13,7 @@ export const AppLayout = () => {
   const location = useLocation();
   const isAiSdkSection = location.pathname.startsWith("/app/ai-sdk");
   const isMastraSection = location.pathname.startsWith("/app/mastra");
+  const isReceiptsSection = location.pathname.startsWith("/app/receipts");
 
   const handleSignOut = async () => {
     await authClient.signOut({
@@ -50,6 +51,15 @@ export const AppLayout = () => {
                 )}
               >
                 Mastra
+              </Link>
+              <Link
+                to="/app/receipts"
+                className={cn(
+                  "rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
+                  isReceiptsSection && "bg-muted text-foreground",
+                )}
+              >
+                Receipts
               </Link>
             </nav>
           </div>

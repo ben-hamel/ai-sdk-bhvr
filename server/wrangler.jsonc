@@ -23,5 +23,15 @@
       "binding": "HYPERDRIVE",
       "id": "b400bdc642994ca9ae192cf137913929"
     }
+  ],
+  "r2_buckets": [
+    {
+      "bucket_name": "bhvr-uploads-dev",
+      "binding": "bhvr_uploads_dev"
+    },
+    {
+      "bucket_name": "bhvr-uploads-prod",
+      "binding": "bhvr_uploads_prod"
+    }
   ]
 }
